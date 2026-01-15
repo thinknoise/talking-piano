@@ -1,0 +1,115 @@
+import { useState } from "react";
+import AudioUploader from "./components/AudioUploader";
+import SpectrumVisualizer from "./components/SpectrumVisualizer";
+import PitchDetector from "./components/PitchDetector";
+import MIDIGenerator from "./components/MIDIGenerator";
+import MicrophoneInput from "./components/MicrophoneInput";
+import "./App.css";
+
+function App() {
+  const [audioBuffer, setAudioBuffer] = useState(null);
+  const [audioContext, setAudioContext] = useState(null);
+  const [pitchData, setPitchData] = useState([]);
+
+  const handleAudioLoaded = (buffer, context) => {
+    setAudioBuffer(buffer);
+    setAudioContext(context);
+    setPitchData([]); // Reset pitch data when new audio is loaded
+  };
+
+  const handlePitchDetected = (pitches) => {
+    setPitchData(pitches);
+  };
+
+  const handleMicrophonePitches = (pitches) => {
+    setPitchData(pitches);
+  };
+
+  return (
+    <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
+      <h1>🎹 Talking Piano</h1>
+      <p style={{ fontSize: "18px", color: "#555", marginBottom: "30px" }}>
+        Audio Spectrum Analyzer & Pitch-to-MIDI Converter
+      </p>
+
+      <div
+        style={{
+          marginBottom: "40px",
+          padding: "20px",
+          background: "#f0f8ff",
+          borderRadius: "8px",
+          border: "2px solid #4a90e2",
+        }}
+      >
+        <h2>🎤 Live Microphone Input</h2>
+        <p style={{ color: "#555", marginBottom: "15px" }}>
+          Record audio from your microphone with real-time pitch detection and
+          visualization
+        </p>
+        <MicrophoneInput onPitchesRecorded={handleMicrophonePitches} />
+      </div>
+
+      <div
+        style={{
+          marginBottom: "40px",
+          padding: "20px",
+          background: "#fff7e6",
+          borderRadius: "8px",
+          border: "2px solid #ffa500",
+        }}
+      >
+        <h2>📁 Upload Audio File</h2>
+        <p style={{ color: "#555", marginBottom: "15px" }}>
+          Or upload an audio file for offline analysis
+        </p>
+        <AudioUploader onAudioLoaded={handleAudioLoaded} />
+
+        {audioBuffer && (
+          <>
+            <SpectrumVisualizer
+              audioBuffer={audioBuffer}
+              audioContext={audioContext}
+            />
+            <PitchDetector
+              audioBuffer={audioBuffer}
+              audioContext={audioContext}
+              onPitchDetected={handlePitchDetected}
+            />
+          </>
+        )}
+      </div>
+
+      {pitchData.length > 0 && (
+        <div
+          style={{
+            marginBottom: "40px",
+            padding: "20px",
+            background: "#e8ffe8",
+            borderRadius: "8px",
+            border: "2px solid #4caf50",
+          }}
+        >
+          <h2>🎵 MIDI Generation</h2>
+          <MIDIGenerator pitchData={pitchData} audioBuffer={audioBuffer} />
+        </div>
+      )}
+
+      <div
+        style={{
+          marginTop: "40px",
+          padding: "20px",
+          background: "#e8f4f8",
+          borderRadius: "8px",
+        }}
+      >
+        <h3>✅ Step 4 Complete: Live Microphone Input</h3>
+        <p>
+          Full pipeline: Record from Mic OR Upload File → Real-time Spectrum
+          Analysis → Pitch Detection → MIDI Export
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default App;
