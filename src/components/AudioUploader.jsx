@@ -31,22 +31,18 @@ export default function AudioUploader({ onAudioLoaded }) {
   };
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#f0f0f0",
-        borderRadius: "8px",
-        marginBottom: "20px",
-      }}
-    >
-      <h2>Step 1: Upload Audio File</h2>
+    <div>
+      <p style={{ color: "#555", marginBottom: "15px" }}>
+        Upload an audio file for analysis
+      </p>
+
       <input
         type="file"
         accept="audio/*"
         onChange={handleFileChange}
         style={{ marginRight: "10px" }}
       />
-      {fileName && <span style={{ color: "green" }}>✓ Loaded: {fileName}</span>}
+      {fileName && <span style={{ color: "green" }}>Loaded: {fileName}</span>}
       {error && (
         <div style={{ color: "red", marginTop: "10px", fontSize: "14px" }}>
           {error}

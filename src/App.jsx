@@ -42,10 +42,6 @@ function App() {
           border: "2px solid #ffa500",
         }}
       >
-        <h2>📁 Upload Audio File</h2>
-        <p style={{ color: "#555", marginBottom: "15px" }}>
-          Or upload an audio file for offline analysis
-        </p>
         <AudioUploader onAudioLoaded={handleAudioLoaded} />
 
         {audioBuffer && (
@@ -78,21 +74,6 @@ function App() {
           <MIDIGenerator pitchData={pitchData} audioBuffer={audioBuffer} />
         </div>
       )}
-
-      <div
-        style={{
-          marginTop: "40px",
-          padding: "20px",
-          background: "#e8f4f8",
-          borderRadius: "8px",
-        }}
-      >
-        <h3>✅ Step 5 Complete: Browser MIDI Playback</h3>
-        <p>
-          Full pipeline: Record from Mic OR Upload File → Real-time Spectrum
-          Analysis → Pitch Detection → Play MIDI in Browser → Download MIDI File
-        </p>
-      </div>
     </div>
   );
 }
