@@ -48,7 +48,6 @@ function autoCorrelate(buffer, sampleRate) {
 
 export default function PitchDetector({
   audioBuffer,
-  audioContext,
   onPitchDetected,
 }) {
   const [pitchData, setPitchData] = useState([]);

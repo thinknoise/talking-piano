@@ -1,7 +1,7 @@
 import { useState } from "react";
 import MidiWriter from "midi-writer-js";
 
-export default function MIDIGenerator({ pitchData, audioBuffer }) {
+export default function MIDIGenerator({ pitchData }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateMIDI = () => {

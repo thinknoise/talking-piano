@@ -3,6 +3,7 @@ import AudioUploader from "./components/AudioUploader";
 import SpectrumVisualizer from "./components/SpectrumVisualizer";
 import PitchDetector from "./components/PitchDetector";
 import MIDIGenerator from "./components/MIDIGenerator";
+import MIDIPlayer from "./components/MIDIPlayer";
 import MicrophoneInput from "./components/MicrophoneInput";
 import "./App.css";
 
@@ -27,25 +28,8 @@ function App() {
 
   return (
     <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
-      <h1>🎹 Talking Piano</h1>
-      <p style={{ fontSize: "18px", color: "#555", marginBottom: "30px" }}>
-        Audio Spectrum Analyzer & Pitch-to-MIDI Converter
-      </p>
-
-      <div
-        style={{
-          marginBottom: "40px",
-          padding: "20px",
-          background: "#f0f8ff",
-          borderRadius: "8px",
-          border: "2px solid #4a90e2",
-        }}
-      >
-        <h2>🎤 Live Microphone Input</h2>
-        <p style={{ color: "#555", marginBottom: "15px" }}>
-          Record audio from your microphone with real-time pitch detection and
-          visualization
-        </p>
+      <h1>Talking Piano</h1>
+      <div>
         <MicrophoneInput onPitchesRecorded={handleMicrophonePitches} />
       </div>
 
@@ -89,7 +73,8 @@ function App() {
             border: "2px solid #4caf50",
           }}
         >
-          <h2>🎵 MIDI Generation</h2>
+          <h2>🎵 MIDI Generation & Playback</h2>
+          <MIDIPlayer pitchData={pitchData} />
           <MIDIGenerator pitchData={pitchData} audioBuffer={audioBuffer} />
         </div>
       )}
@@ -102,10 +87,10 @@ function App() {
           borderRadius: "8px",
         }}
       >
-        <h3>✅ Step 4 Complete: Live Microphone Input</h3>
+        <h3>✅ Step 5 Complete: Browser MIDI Playback</h3>
         <p>
           Full pipeline: Record from Mic OR Upload File → Real-time Spectrum
-          Analysis → Pitch Detection → MIDI Export
+          Analysis → Pitch Detection → Play MIDI in Browser → Download MIDI File
         </p>
       </div>
     </div>

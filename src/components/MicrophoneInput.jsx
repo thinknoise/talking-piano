@@ -80,7 +80,8 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
       source.connect(analyser);
 
       setIsRecording(true);
-      startTimeRef.current = Date.now();
+      // eslint-disable-next-line react-hooks/purity
+      startTimeRef.current = performance.now();
       pitchesRef.current = [];
       setRecordedPitches([]);
 
@@ -137,7 +138,8 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
     const hz = autoCorrelate(timeDomainData, audioContext.sampleRate);
 
     if (hz > 50 && hz < 1000) {
-      const time = (Date.now() - startTimeRef.current) / 1000;
+      // eslint-disable-next-line react-hooks/purity
+      const time = (performance.now() - startTimeRef.current) / 1000;
       const pitch = { time: time.toFixed(3), hz: Math.round(hz * 100) / 100 };
 
       setCurrentPitch(pitch);
@@ -203,8 +205,6 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
         marginBottom: "20px",
       }}
     >
-      <h2>🎤 Live Microphone Input</h2>
-
       <canvas
         ref={canvasRef}
         width={800}
@@ -213,7 +213,7 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
           border: "2px solid #333",
           borderRadius: "4px",
           display: "block",
-          marginBottom: "10px",
+          margin: "0px auto 10px auto",
           background: "#000",
         }}
       />
@@ -288,11 +288,6 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
           </p>
         </div>
       )}
-
-      <p style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
-        Click "Start Recording" to capture live audio from your microphone.
-        Real-time pitch detection and spectrum visualization.
-      </p>
     </div>
   );
 }
