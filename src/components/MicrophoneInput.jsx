@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Soundfont from "soundfont-player";
 
 // Autocorrelation pitch detection (same as PitchDetector)
 function autoCorrelate(buffer, sampleRate) {
@@ -43,19 +44,45 @@ function autoCorrelate(buffer, sampleRate) {
   return hz;
 }
 
-export default function MicrophoneInput({ onPitchesRecorded }) {
+export default function MicrophoneInput({
+  onPitchesRecorded,
+  onAudioRecorded,
+}) {
   const [isRecording, setIsRecording] = useState(false);
   const [currentPitch, setCurrentPitch] = useState(null);
   const [recordedPitches, setRecordedPitches] = useState([]);
   const [error, setError] = useState("");
+  const [livePlayback, setLivePlayback] = useState(false);
+  const [instrument, setInstrument] = useState(null);
 
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const micStreamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const animationRef = useRef(null);
   const startTimeRef = useRef(0);
   const pitchesRef = useRef([]);
+  const currentNoteRef = useRef(null);
+  const playbackAudioContextRef = useRef(null);
+
+  // Load soundfont instrument on mount
+  useEffect(() => {
+    const loadInstrument = async () => {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      playbackAudioContextRef.current = ac;
+      const instr = await Soundfont.instrument(ac, "acoustic_grand_piano");
+      setInstrument(instr);
+    };
+    loadInstrument();
+
+    return () => {
+      if (playbackAudioContextRef.current) {
+        playbackAudioContextRef.current.close();
+      }
+    };
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -79,6 +106,19 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
 
+      // Set up MediaRecorder to capture raw audio
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start();
+
       setIsRecording(true);
       // eslint-disable-next-line react-hooks/purity
       startTimeRef.current = performance.now();
@@ -93,12 +133,46 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
     setIsRecording(false);
 
     // Stop animation
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
+    }
+
+    // Stop MediaRecorder
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      mediaRecorderRef.current.stop();
+
+      // Wait for final data and process audio
+      await new Promise((resolve) => {
+        mediaRecorderRef.current.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: "audio/webm",
+          });
+
+          // Convert to AudioBuffer
+          try {
+            const arrayBuffer = await audioBlob.arrayBuffer();
+            const audioContext = new (window.AudioContext ||
+              window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+            // Send to parent for spectrogram analysis
+            if (onAudioRecorded) {
+              onAudioRecorded(audioBuffer, audioContext);
+            }
+          } catch (err) {
+            console.error("Failed to decode recorded audio:", err);
+          }
+
+          resolve();
+        };
+      });
     }
 
     // Stop microphone stream
@@ -144,8 +218,31 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
 
       setCurrentPitch(pitch);
       pitchesRef.current.push(pitch);
+
+      // Live MIDI playback
+      if (livePlayback && instrument) {
+        const midiNote = Math.round(69 + 12 * Math.log2(hz / 440));
+        
+        // If note changed, stop previous and play new
+        if (currentNoteRef.current !== midiNote) {
+          if (currentNoteRef.current !== null) {
+            instrument.stop();
+          }
+          instrument.play(midiNote, playbackAudioContextRef.current.currentTime, {
+            duration: 0.5,
+            gain: 0.3,
+          });
+          currentNoteRef.current = midiNote;
+        }
+      }
     } else {
       setCurrentPitch(null);
+      
+      // Stop playing when no pitch detected
+      if (livePlayback && instrument && currentNoteRef.current !== null) {
+        instrument.stop();
+        currentNoteRef.current = null;
+      }
     }
 
     // Get frequency data for visualization
@@ -217,6 +314,21 @@ export default function MicrophoneInput({ onPitchesRecorded }) {
           background: "#000",
         }}
       />
+
+      <div style={{ marginBottom: "15px" }}>
+        <label style={{ display: "flex", alignItems: "center", marginBottom: "10px", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={livePlayback}
+            onChange={(e) => setLivePlayback(e.target.checked)}
+            disabled={!instrument || isRecording}
+            style={{ marginRight: "8px" }}
+          />
+          <span style={{ fontSize: "14px", color: instrument ? "#333" : "#999" }}>
+            🎹 Enable Live MIDI Playback {!instrument && "(loading piano...)"}
+          </span>
+        </label>
+      </div>
 
       <div style={{ marginBottom: "15px" }}>
         {!isRecording ? (
