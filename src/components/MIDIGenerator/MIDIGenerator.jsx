@@ -28,7 +28,11 @@ export default function MIDIGenerator({ pitchData }) {
       // Group pitches into time windows (20ms)
       const timeWindowSize = 0.02;
       const pitchGroups = [];
-      let currentGroup = { startTime: 0, pitches: [] };
+
+      let currentGroup = {
+        startTime: 0,
+        pitches: [],
+      };
 
       for (const item of pitchData) {
         const time = parseFloat(item.time);
@@ -36,9 +40,15 @@ export default function MIDIGenerator({ pitchData }) {
 
         if (time > currentGroup.startTime + timeWindowSize) {
           if (currentGroup.pitches.length > 0) {
-            pitchGroups.push({ ...currentGroup });
+            pitchGroups.push({
+              ...currentGroup,
+            });
           }
-          currentGroup = { startTime: time, pitches: [hz] };
+
+          currentGroup = {
+            startTime: time,
+            pitches: [hz],
+          };
         } else {
           currentGroup.pitches.push(hz);
         }
@@ -71,24 +81,30 @@ export default function MIDIGenerator({ pitchData }) {
         // Add rest if needed
         if (targetTimeTicks > currentTimeTicks) {
           const waitTicks = targetTimeTicks - currentTimeTicks;
+
           track.addEvent(
             new MidiWriter.NoteEvent({
               pitch: ["C4"],
-              duration: `T${waitTicks}`,
+              duration: `T$ {
+                  waitTicks
+                }
+
+                `,
               velocity: 0,
-            })
+            }),
           );
           currentTimeTicks = targetTimeTicks;
         }
 
         // Calculate duration
         let durationTicks = 16;
+
         if (i + 1 < pitchGroups.length) {
           const nextTime = pitchGroups[i + 1].startTime;
           const timeDiff = nextTime - time;
           durationTicks = Math.max(
             8,
-            Math.min(64, Math.round(timeDiff * ticksPerSecond))
+            Math.min(64, Math.round(timeDiff * ticksPerSecond)),
           );
         }
 
@@ -96,9 +112,13 @@ export default function MIDIGenerator({ pitchData }) {
         track.addEvent(
           new MidiWriter.NoteEvent({
             pitch: midiNotes,
-            duration: `T${durationTicks}`,
+            duration: `T$ {
+                durationTicks
+              }
+
+              `,
             velocity: 80,
-          })
+          }),
         );
 
         currentTimeTicks += durationTicks;
@@ -109,7 +129,9 @@ export default function MIDIGenerator({ pitchData }) {
       const midiData = write.buildFile();
 
       // Download
-      const blob = new Blob([midiData], { type: "audio/midi" });
+      const blob = new Blob([midiData], {
+        type: "audio/midi",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -120,7 +142,12 @@ export default function MIDIGenerator({ pitchData }) {
       setIsGenerating(false);
     } catch (err) {
       console.error("MIDI generation error:", err);
-      alert(`Failed to generate MIDI: ${err.message}`);
+
+      alert(`Failed to generate MIDI: $ {
+          err.message
+        }
+
+        `);
       setIsGenerating(false);
     }
   };
@@ -128,45 +155,34 @@ export default function MIDIGenerator({ pitchData }) {
   const hasPitchData = pitchData && pitchData.length > 0;
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#f0f0f0",
-        borderRadius: "8px",
-        marginBottom: "20px",
-      }}
-    >
+    <div className="midi-generator-container">
+      {" "}
       <h2>MIDI Generation</h2>
-
       <button
         onClick={generateMIDI}
         disabled={!hasPitchData || isGenerating}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          cursor: hasPitchData && !isGenerating ? "pointer" : "not-allowed",
-          background: hasPitchData ? "#4CAF50" : "#ccc",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-        }}
+        className={`btn ${hasPitchData && !isGenerating ? "btn-primary" : "btn-disabled"}`}
       >
-        {isGenerating ? "Generating..." : "🎵 Generate MIDI File"}
-      </button>
-
+        {isGenerating ? "Generating..." : "💾 Generate MIDI File"}
+      </button>{" "}
       {hasPitchData && (
-        <div style={{ marginTop: "15px", fontSize: "14px", color: "#666" }}>
-          <p>✓ Ready to generate MIDI from {pitchData.length} pitch samples</p>
-          <p style={{ marginTop: "5px" }}>
+        <div className="midi-generator-info">
+          {" "}
+          <p>
+            ✓ Ready to generate MIDI from {pitchData.length}
+            pitch samples
+          </p>{" "}
+          <p>
+            {" "}
             This will create a MIDI file where each detected pitch becomes a
-            MIDI note with accurate timing at 120 BPM.
-          </p>
+            MIDI note with accurate timing at 120 BPM.{" "}
+          </p>{" "}
         </div>
       )}
-
       {!hasPitchData && (
-        <p style={{ marginTop: "10px", fontSize: "14px", color: "#999" }}>
-          Detect pitches first to enable MIDI generation
+        <p className="midi-generator-disabled-message">
+          {" "}
+          Detect pitches first to enable MIDI generation{" "}
         </p>
       )}
     </div>

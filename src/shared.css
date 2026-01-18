@@ -1,0 +1,209 @@
+@import './colors.css';
+
+/* Button Styles - Shiny Black Car Effect */
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: var(--btn-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-hover);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-success {
+  background: var(--btn-success);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: var(--btn-success-hover);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-danger {
+  background: var(--btn-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--btn-danger-hover);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--btn-secondary-hover);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-disabled {
+  background: var(--btn-disabled);
+  color: #666;
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
+.btn-large {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Text Styles */
+.text-description {
+  font-size: 14px;
+  color: #666;
+}
+
+.text-small {
+  font-size: 12px;
+  color: #666;
+}
+
+.text-tiny {
+  font-size: 11px;
+  color: #999;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.text-error {
+  color: #e74c3c;
+}
+
+.text-success {
+  color: #27ae60;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+/* Message Boxes */
+.message {
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.message-error {
+  color: #e74c3c;
+  background: #ffeaea;
+  border: 1px solid #ffcccc;
+}
+
+.message-success {
+  color: #27ae60;
+  background: #e8f8f0;
+  border: 1px solid #c3e6d4;
+}
+
+.message-info {
+  color: #2c3e50;
+  background: #e8f4f8;
+  border: 1px solid #d0e8f0;
+}
+
+/* Canvas Styles */
+.canvas {
+  border: 2px solid #333;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+  background: #000;
+}
+
+.canvas-small {
+  margin-bottom: 10px;
+}
+
+/* Code/Monospace Display */
+.code-display {
+  font-family: monospace;
+  font-size: 12px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.code-scrollable {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* Utility Classes */
+.mt-5 {
+  margin-top: 5px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mt-15 {
+  margin-top: 15px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-5 {
+  margin-bottom: 5px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-15 {
+  margin-bottom: 15px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex-gap-10 {
+  gap: 10px;
+}
+
+.flex-gap-20 {
+  gap: 20px;
+}

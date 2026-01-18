@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import "./Spectrogram.css";
 
 export default function Spectrogram({ audioBuffer, audioContext }) {
   const canvasRef = useRef(null);
@@ -23,7 +24,7 @@ export default function Spectrogram({ audioBuffer, audioContext }) {
     const offlineContext = new OfflineAudioContext(
       1,
       audioBuffer.length,
-      audioBuffer.sampleRate
+      audioBuffer.sampleRate,
     );
 
     // Create analyser
@@ -61,14 +62,14 @@ export default function Spectrogram({ audioBuffer, audioContext }) {
 
     for (let t = 0; t < canvas.width; t++) {
       const timeIndex = Math.floor(
-        t * timeStepsPerPixel * timeStep * sampleRate
+        t * timeStepsPerPixel * timeStep * sampleRate,
       );
 
       if (timeIndex + analyser.fftSize < channelData.length) {
         // Perform FFT on this time slice
         const slice = channelData.slice(
           timeIndex,
-          timeIndex + analyser.fftSize
+          timeIndex + analyser.fftSize,
         );
         const fftData = performFFT(slice);
         spectrogramArray.push(fftData);
@@ -196,71 +197,34 @@ export default function Spectrogram({ audioBuffer, audioContext }) {
   };
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#1a1a1a",
-        borderRadius: "8px",
-        marginBottom: "20px",
-      }}
-    >
-      <h2 style={{ color: "#fff" }}>Spectrogram</h2>
-      <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "15px" }}>
+    <div className="spectrogram-container">
+      <h2>Spectrogram</h2>
+      <p className="spectrogram-description">
         Time-frequency visualization showing harmonic content and pitch
         evolution
       </p>
 
       {isGenerating && (
-        <div style={{ marginBottom: "15px" }}>
-          <div
-            style={{
-              width: "100%",
-              height: "6px",
-              background: "#333",
-              borderRadius: "3px",
-              overflow: "hidden",
-            }}
-          >
+        <div className="spectrogram-progress-wrapper">
+          <div className="spectrogram-progress-container">
             <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                background: "#4caf50",
-                transition: "width 0.1s linear",
-              }}
+              className="spectrogram-progress-bar"
+              style={{ width: `${progress}%` }}
             />
           </div>
-          <p style={{ color: "#aaa", fontSize: "12px", marginTop: "5px" }}>
+          <p className="spectrogram-progress-text">
             Generating spectrogram... {progress}%
           </p>
         </div>
       )}
 
-      <canvas
-        ref={canvasRef}
-        style={{
-          border: "2px solid #333",
-          borderRadius: "4px",
-          display: "block",
-          background: "#000",
-          maxWidth: "100%",
-        }}
-      />
+      <canvas ref={canvasRef} className="spectrogram-canvas" />
 
-      <div
-        style={{
-          marginTop: "15px",
-          padding: "10px",
-          background: "#2a2a2a",
-          borderRadius: "4px",
-        }}
-      >
-        <p style={{ color: "#aaa", fontSize: "12px", margin: 0 }}>
+      <div className="spectrogram-legend">
+        <p>
           🔵 Blue = Low intensity | 🟡 Yellow = Medium | 🔴 Red = High intensity
         </p>
-        <p style={{ color: "#aaa", fontSize: "12px", margin: "5px 0 0 0" }}>
-          Y-axis: Frequency (Hz) | X-axis: Time (seconds)
-        </p>
+        <p>Y-axis: Frequency (Hz) | X-axis: Time (seconds)</p>
       </div>
     </div>
   );

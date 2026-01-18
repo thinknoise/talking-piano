@@ -1,0 +1,22 @@
+:root {
+  --gray-88: radial-gradient(circle at 30% 30%, #999 0%, #888 30%, #666 100%);
+  --gray-55: radial-gradient(circle at 30% 30%, #666 0%, #555 30%, #333 100%);
+  --gray-bc: radial-gradient(circle at 30% 30%, #dcdcdc 0%, #bcbcbc 40%, #a0a0a0 100%);
+  --gray-dc: radial-gradient(circle at 30% 30%, #ececec 0%, #dcdcdc 40%, #c0c0c0 100%);
+  --gray-e8: radial-gradient(circle at 30% 30%, #f8f8f8 0%, #e8e8e8 40%, #d0d0d0 100%);
+
+  /* Button gradients - shiny black car effect */
+  --btn-primary: radial-gradient(circle at 30% 30%, #555 0%, #333 50%, #1a1a1a 100%);
+  --btn-primary-hover: radial-gradient(circle at 30% 30%, #666 0%, #444 50%, #2a2a2a 100%);
+
+  --btn-success: radial-gradient(circle at 30% 30%, #4a5a45 0%, #3a4a35 50%, #2a3525 100%);
+  --btn-success-hover: radial-gradient(circle at 30% 30%, #5a6a55 0%, #4a5a45 50%, #3a4a35 100%);
+
+  --btn-danger: radial-gradient(circle at 30% 30%, #f85a3e 0%, #e74c3c 50%, #a82820 100%);
+  --btn-danger-hover: radial-gradient(circle at 30% 30%, #ff6a4e 0%, #f85a3e 50%, #c03828 100%);
+
+  --btn-secondary: radial-gradient(circle at 30% 30%, #777 0%, #555 50%, #2a2a2a 100%);
+  --btn-secondary-hover: radial-gradient(circle at 30% 30%, #888 0%, #666 50%, #3a3a3a 100%);
+
+  --btn-disabled: radial-gradient(circle at 30% 30%, #e0e0e0 0%, #ccc 50%, #aaa 100%);
+}
