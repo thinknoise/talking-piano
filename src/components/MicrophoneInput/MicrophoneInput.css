@@ -13,6 +13,8 @@
   display: block;
   margin: 0 auto 10px auto;
   background: #000;
+  max-width: 100%;
+  height: auto;
 }
 
 .controls-row {
@@ -20,9 +22,9 @@
   align-items: flex-start;
   gap: 20px;
   flex-wrap: wrap;
-  width: 800px;
+  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
-  max-width: 100%;
   justify-content: space-between;
 }
 
@@ -121,4 +123,21 @@
   font-size: 11px;
   color: #999;
   margin: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .emoji-live-label {
+    min-width: 200px;
+  }
+
+  .microphone-container {
+    padding: 10px;
+  }
 }

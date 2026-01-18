@@ -133,6 +133,8 @@
   display: block;
   margin: 0 auto;
   background: #000;
+  max-width: 100%;
+  height: auto;
 }
 
 .canvas-small {
