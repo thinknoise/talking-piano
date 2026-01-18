@@ -1,9 +1,9 @@
 :root {
-  --gray-88: radial-gradient(circle at 30% 30%, #999 0%, #888 30%, #666 100%);
-  --gray-55: radial-gradient(circle at 30% 30%, #666 0%, #555 30%, #333 100%);
-  --gray-bc: radial-gradient(circle at 30% 30%, #dcdcdc 0%, #bcbcbc 40%, #a0a0a0 100%);
-  --gray-dc: radial-gradient(circle at 30% 30%, #ececec 0%, #dcdcdc 40%, #c0c0c0 100%);
-  --gray-e8: radial-gradient(circle at 30% 30%, #f8f8f8 0%, #e8e8e8 40%, #d0d0d0 100%);
+  --gray-88: linear-gradient(to bottom, #888888, #666);
+  --gray-55: linear-gradient(to bottom, #555555, #333);
+  --gray-bc: linear-gradient(to bottom, #bcbcbc, #a0a0a0);
+  --gray-dc: linear-gradient(to bottom, #dcdcdc, #c0c0c0);
+  --gray-e8: linear-gradient(to bottom, #e8e8e8, #d0d0d0);
 
   /* Button gradients - shiny black car effect */
   --btn-primary: radial-gradient(circle at 30% 30%, #555 0%, #333 50%, #1a1a1a 100%);

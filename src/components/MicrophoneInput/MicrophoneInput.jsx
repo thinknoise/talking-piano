@@ -167,11 +167,20 @@ export default function MicrophoneInput({
   // Load soundfont instrument on mount and when instrument changes
   useEffect(() => {
     const loadInstrument = async () => {
-      if (playbackAudioContextRef.current) {
+      if (
+        playbackAudioContextRef.current &&
+        playbackAudioContextRef.current.state !== "closed"
+      ) {
         playbackAudioContextRef.current.close();
       }
       const ac = new (window.AudioContext || window.webkitAudioContext)();
       playbackAudioContextRef.current = ac;
+
+      // Resume AudioContext if it's suspended (required by browsers for autoplay policy)
+      if (ac.state === "suspended") {
+        await ac.resume();
+      }
+
       const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
@@ -179,7 +188,10 @@ export default function MicrophoneInput({
     loadInstrument();
 
     return () => {
-      if (playbackAudioContextRef.current) {
+      if (
+        playbackAudioContextRef.current &&
+        playbackAudioContextRef.current.state !== "closed"
+      ) {
         playbackAudioContextRef.current.close();
       }
     };
@@ -289,20 +301,24 @@ export default function MicrophoneInput({
             type: "audio/webm",
           });
 
-          // Convert to AudioBuffer
-          try {
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            const audioContext = new (
-              window.AudioContext || window.webkitAudioContext
-            )();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          // Only process if we have audio data
+          if (audioBlob.size > 0) {
+            // Convert to AudioBuffer - create a new context for playback
+            try {
+              const arrayBuffer = await audioBlob.arrayBuffer();
+              const playbackContext = new (
+                window.AudioContext || window.webkitAudioContext
+              )();
+              const audioBuffer =
+                await playbackContext.decodeAudioData(arrayBuffer);
 
-            // Send to parent for spectrogram analysis
-            if (onAudioRecorded) {
-              onAudioRecorded(audioBuffer, audioContext);
+              // Send to parent for spectrogram analysis with the new playback context
+              if (onAudioRecorded) {
+                onAudioRecorded(audioBuffer, playbackContext);
+              }
+            } catch (err) {
+              console.error("Failed to decode recorded audio:", err);
             }
-          } catch (err) {
-            console.error("Failed to decode recorded audio:", err);
           }
 
           resolve();
@@ -315,8 +331,8 @@ export default function MicrophoneInput({
       micStreamRef.current.getTracks().forEach((track) => track.stop());
     }
 
-    // Close audio context
-    if (audioContextRef.current) {
+    // Close the recording audio context (not the playback context)
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close();
     }
 
@@ -372,7 +388,7 @@ export default function MicrophoneInput({
             midiNote,
             playbackAudioContextRef.current.currentTime,
             {
-              gain: 0.3,
+              gain: 1.0,
             },
           );
           currentNoteRef.current = midiNote;
