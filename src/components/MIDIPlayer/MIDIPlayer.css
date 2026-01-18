@@ -2,7 +2,7 @@
 
 .midi-player-container {
   padding: 20px;
-  background: radial-gradient(circle at 50% 50%, rgba(200, 220, 255, 0.15) 0%, rgba(240, 240, 240, 1) 60%, #f0f0f0 100%);
+  background: #f0f0f0;
   border-radius: 8px;
   margin-top: 20px;
 }

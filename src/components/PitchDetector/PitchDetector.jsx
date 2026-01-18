@@ -50,7 +50,7 @@ function autoCorrelate(buffer, sampleRate) {
   return hz;
 }
 
-export default function PitchDetector({ audioBuffer, onPitchDetected }) {
+export default function PitchDetector({ audioBuffer, onPitchDetected, detectionMethod, onDetectionMethodChange }) {
   const [pitchData, setPitchData] = useState([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -122,7 +122,42 @@ export default function PitchDetector({ audioBuffer, onPitchDetected }) {
 
   return (
     <div className="pitch-detector-container">
-      <h2>Pitch Detection</h2>
+      <h2>🎼 Pitch Detection (Autocorrelation)</h2>
+
+      <div className="detection-method-selector">
+        <h3>Choose Pitch Detection Method:</h3>
+        <div className="detection-methods">
+          <label className="detection-method-label">
+            <input
+              type="radio"
+              value="autocorrelation"
+              checked={detectionMethod === "autocorrelation"}
+              onChange={(e) => onDetectionMethodChange(e.target.value)}
+            />
+            <div>
+              <strong>Autocorrelation (Simple)</strong>
+              <p className="detection-method-info">
+                Fast, monophonic (single note at a time), good for melodies
+              </p>
+            </div>
+          </label>
+          <label className="detection-method-label">
+            <input
+              type="radio"
+              value="spectral"
+              checked={detectionMethod === "spectral"}
+              onChange={(e) => onDetectionMethodChange(e.target.value)}
+            />
+            <div>
+              <strong>Spectral (Advanced)</strong>
+              <p className="detection-method-info">
+                Polyphonic (chords), velocity-sensitive, harmonic filtering
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <button
         onClick={detectPitches}
         disabled={!audioBuffer || isDetecting}
