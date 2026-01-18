@@ -30,66 +30,105 @@
 
 .controls-section {
   flex: 0 0 auto;
-}
-
-.live-playback-label {
   display: flex;
   align-items: center;
-  cursor: pointer;
   gap: 8px;
 }
 
-.live-playback-checkbox {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.emoji-live-label {
+.live-playback-button {
+  width: 150px;
+  height: 44px;
+  background: #2c3e50;
+  border: none;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  font-size: 18px;
+  justify-content: space-between;
+  padding: 0 5px;
+  cursor: pointer;
   position: relative;
+  transition: all 0.2s ease;
 }
 
-.emoji-live-label.disabled {
-  opacity: 0.4;
-}
-
-.emoji-live-label.enabled {
-  opacity: 1;
-}
-
-.emoji-mic,
-.emoji-speaker {
-  display: inline-block;
-  position: relative;
-  z-index: 2;
-  padding: 0 8px;
-}
-
-.emoji-connector {
+.live-playback-button::before {
+  content: '';
   position: absolute;
   left: 20px;
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
-  height: 10px;
+  height: 8px;
   background: transparent;
   transition: background 0.2s ease;
+  z-index: 0;
+}
+
+.live-playback-button.active::before {
+  background: #0008ff;
+}
+
+.live-playback-button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.live-playback-button.enabled:hover:not(.active) {
+  background: #34495e;
+}
+
+.live-playback-button.active {
+  background: #e74c3c;
+}
+
+.live-playback-button.active:hover {
+  background: #c0392b;
+}
+
+.emoji-mic,
+.emoji-speaker {
+  font-size: 24px;
+  line-height: 1;
+  position: relative;
   z-index: 1;
 }
 
-.emoji-live-label.active .emoji-connector {
-  background: #e74c3c;
+.live-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: bold;
+  color: transparent;
+  z-index: 1;
+  letter-spacing: 1px;
+  transition: color 0.2s ease;
+}
+
+.live-playback-button.active .live-text {
+  color: #fff;
 }
 
 .loading-text {
   font-size: 12px;
   color: #999;
   margin-left: 8px;
+}
+
+.instrument-selector {
+  height: 44px;
+  padding: 0 10px;
+  border: 2px solid #666;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.instrument-selector:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .stats-section {
