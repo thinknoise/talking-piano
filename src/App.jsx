@@ -73,9 +73,9 @@ function App() {
       {activeAudioBuffer && (
         <div className="section section-analysis">
           <h2>
-            📊 Audio Analysis{" "}
+            📊 Audio Analysis
             {audioSource &&
-              `(${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
+              ` (${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
           </h2>
 
           <SpectrumVisualizer

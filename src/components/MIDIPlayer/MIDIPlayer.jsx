@@ -128,14 +128,11 @@ export default function MIDIPlayer({ pitchData }) {
 
   return (
     <div className="midi-player-container">
-      {" "}
-      <h3>🎹 MIDI Player</h3>{" "}
+      <h3>🎹 MIDI Player</h3>
       <p className="midi-player-description">
-        {" "}
-        Play your detected pitches as MIDI audio in the browser{" "}
-      </p>{" "}
+        Play your detected pitches as MIDI audio in the browser
+      </p>
       <div className="midi-player-controls">
-        {" "}
         {!isPlaying ? (
           <button
             onClick={playMIDI}
@@ -146,17 +143,15 @@ export default function MIDIPlayer({ pitchData }) {
           </button>
         ) : (
           <button onClick={stopPlayback} className="btn btn-large btn-primary">
-            {" "}
-            ⏹ Stop{" "}
+            ⏹ Stop
           </button>
         )}
         {!instrument && (
           <span className="midi-player-loading">
-            {" "}
-            Loading piano soundfont...{" "}
+            Loading piano soundfont...
           </span>
         )}
-      </div>{" "}
+      </div>
       {isPlaying && (
         <div>
           <div className="midi-player-progress-container">
@@ -169,10 +164,8 @@ export default function MIDIPlayer({ pitchData }) {
         </div>
       )}
       <p className="midi-player-info">
-        {" "}
-        Using acoustic grand piano soundfont • {pitchData.length}
-        pitch samples{" "}
-      </p>{" "}
+        Using acoustic grand piano soundfont • {pitchData.length} pitch samples
+      </p>
     </div>
   );
 }

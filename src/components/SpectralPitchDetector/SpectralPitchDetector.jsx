@@ -209,19 +209,15 @@ export default function SpectralPitchDetector({
 
   return (
     <div className="spectral-detector">
-      {" "}
-      <h2>🎼 Spectral Pitch Detection (Polyphonic)</h2>{" "}
+      <h2>🎼 Spectral Pitch Detection (Polyphonic)</h2>
       <p className="spectral-detector-description">
-        {" "}
         Advanced pitch detection using FFT spectrum analysis. Detects multiple
-        simultaneous notes (chords) with velocity information.{" "}
-      </p>{" "}
+        simultaneous notes (chords) with velocity information.
+      </p>
       <div className="sensitivity-control">
-        {" "}
         <label className="sensitivity-label">
-          {" "}
-          Sensitivity (filter weak signals for faster processing):{" "}
-        </label>{" "}
+          Sensitivity (filter weak signals for faster processing):
+        </label>
         <input
           type="range"
           min="0.01"
@@ -231,17 +227,16 @@ export default function SpectralPitchDetector({
           onChange={(e) => setSensitivity(parseFloat(e.target.value))}
           disabled={isDetecting}
           className="sensitivity-slider"
-        />{" "}
+        />
         <span className="sensitivity-value">
-          {" "}
-          {sensitivity.toFixed(2)}{" "}
+          {sensitivity.toFixed(2)}
           {sensitivity < 0.05
-            ? "(very sensitive)"
+            ? " (very sensitive)"
             : sensitivity < 0.1
-              ? "(balanced)"
-              : "(fast)"}
-        </span>{" "}
-      </div>{" "}
+              ? " (balanced)"
+              : " (fast)"}
+        </span>
+      </div>
       <button
         onClick={detectPitches}
         disabled={!audioBuffer || isDetecting}
@@ -250,67 +245,48 @@ export default function SpectralPitchDetector({
         {isDetecting
           ? `Analyzing... ${progress}%`
           : "🔬 Detect Polyphonic Pitches"}
-      </button>{" "}
+      </button>
       {isDetecting && (
         <div className="progress-container">
-          {" "}
           <div className="progress-bar">
-            {" "}
-            <div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-            />{" "}
-          </div>{" "}
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
         </div>
       )}
       {detectedNotes.length > 0 && (
         <div className="results-container">
-          {" "}
-          <h3>
-            ✓ Detected {detectedNotes.length}
-            notes with velocity
-          </h3>{" "}
+          <h3>✓ Detected {detectedNotes.length} notes with velocity</h3>
           <div className="notes-list">
-            {" "}
             {detectedNotes.slice(0, 50).map((note, i) => (
               <div key={i}>
-                {" "}
-                {note.time}
-                s: {note.hz.toFixed(1)}
-                Hz (MIDI {note.midi}) vel= {note.velocity}
+                {note.time}s: {note.hz.toFixed(1)}Hz (MIDI {note.midi}) vel=
+                {note.velocity}
               </div>
             ))}
             {detectedNotes.length > 50 && (
               <div className="notes-more">
-                {" "}
-                ... and {detectedNotes.length - 50}
-                more{" "}
+                ... and {detectedNotes.length - 50} more
               </div>
             )}
-          </div>{" "}
+          </div>
           <div className="results-summary">
-            {" "}
             <p>
-              {" "}
               <strong>Range:</strong>{" "}
-              {Math.min(...detectedNotes.map((n) => n.hz)).toFixed(1)}
-              Hz - {Math.max(...detectedNotes.map((n) => n.hz)).toFixed(1)}
-              Hz{" "}
-            </p>{" "}
+              {Math.min(...detectedNotes.map((n) => n.hz)).toFixed(1)}Hz -{" "}
+              {Math.max(...detectedNotes.map((n) => n.hz)).toFixed(1)}Hz
+            </p>
             <p>
-              {" "}
               <strong>Features:</strong> Polyphonic detection • Harmonic
-              filtering • MIDI velocity{" "}
-            </p>{" "}
-          </div>{" "}
+              filtering • MIDI velocity
+            </p>
+          </div>
         </div>
       )}
       <p className="algorithm-note">
-        {" "}
         This method uses FFT spectrum analysis to identify multiple simultaneous
         pitches, filter out harmonics, and extract velocity information for
-        realistic MIDI generation.{" "}
-      </p>{" "}
+        realistic MIDI generation.
+      </p>
     </div>
   );
 }

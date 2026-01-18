@@ -122,69 +122,42 @@ export default function PitchDetector({ audioBuffer, onPitchDetected }) {
 
   return (
     <div className="pitch-detector-container">
-      {" "}
-      <h2>Pitch Detection</h2>{" "}
+      <h2>Pitch Detection</h2>
       <button
         onClick={detectPitches}
         disabled={!audioBuffer || isDetecting}
-        className={`btn $ {
-        audioBuffer && !isDetecting ? 'btn-primary' : 'btn-disabled'
-      }
-
-      `}
+        className={`btn ${audioBuffer && !isDetecting ? "btn-primary" : "btn-disabled"}`}
       >
-        {" "}
-        {isDetecting
-          ? `Detecting... $ {
-        progress
-      }
-
-      %`
-          : "Detect Pitches"}
-      </button>{" "}
+        {isDetecting ? `Detecting... ${progress}%` : "Detect Pitches"}
+      </button>
       {pitchData.length > 0 && (
         <button onClick={downloadJSON} className="btn btn-primary">
-          {" "}
-          Download Pitch Data (JSON){" "}
+          Download Pitch Data (JSON)
         </button>
       )}
       {pitchData.length > 0 && (
         <div className="pitch-results">
-          {" "}
-          <h3>
-            Detected Pitches: {pitchData.length}
-            samples
-          </h3>{" "}
+          <h3>Detected Pitches: {pitchData.length} samples</h3>
           <div className="pitch-list">
-            {" "}
             {pitchData.slice(0, 50).map((p, i) => (
               <div key={i}>
-                {" "}
-                {p.time}
-                s: {p.hz}
-                Hz{" "}
+                {p.time}s: {p.hz}Hz
               </div>
             ))}
             {pitchData.length > 50 && (
-              <div>
-                ... and {pitchData.length - 50}
-                more
-              </div>
+              <div>... and {pitchData.length - 50} more</div>
             )}
-          </div>{" "}
+          </div>
           <p className="pitch-range-info">
-            {" "}
-            Range: {Math.min(...pitchData.map((p) => p.hz))}
-            Hz - {Math.max(...pitchData.map((p) => p.hz))}
-            Hz{" "}
-          </p>{" "}
+            Range: {Math.min(...pitchData.map((p) => p.hz))}Hz -{" "}
+            {Math.max(...pitchData.map((p) => p.hz))}Hz
+          </p>
         </div>
       )}
       <p className="pitch-algorithm-note">
-        {" "}
         This extracts the dominant pitch (frequency) throughout the audio using
-        autocorrelation.{" "}
-      </p>{" "}
+        autocorrelation.
+      </p>
     </div>
   );
 }
