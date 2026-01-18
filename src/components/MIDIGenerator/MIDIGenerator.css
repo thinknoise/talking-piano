@@ -1,28 +1,26 @@
 @import '../../shared.css';
 
-.midi-generator-container {
-  padding: 20px;
-  background: #f0f0f0;
+.midi-download-button {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #ddd;
   border-radius: 8px;
-  margin-bottom: 20px;
+  background: white;
+  color: #333;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.midi-generator-container h2 {
-  margin-top: 0;
+.midi-download-button:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #999;
 }
 
-.midi-generator-info {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #666;
-}
-
-.midi-generator-info p {
-  margin-top: 5px;
-}
-
-.midi-generator-disabled-message {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #999;
+.midi-download-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

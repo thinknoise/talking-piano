@@ -1,56 +1,14 @@
 import { useState } from "react";
+
+import { autoCorrelate } from "../../utils/pitchDetection";
 import "./PitchDetector.css";
 
-// Autocorrelation pitch detection algorithm
-function autoCorrelate(buffer, sampleRate) {
-  const SIZE = buffer.length;
-  const MAX_SAMPLES = Math.floor(SIZE / 2);
-  let best_offset = -1;
-  let best_correlation = 0;
-  let rms = 0;
-
-  // Calculate RMS (root mean square) for volume detection
-  for (let i = 0; i < SIZE; i++) {
-    const val = buffer[i];
-    rms += val * val;
-  }
-
-  rms = Math.sqrt(rms / SIZE);
-
-  // Not enough signal
-  if (rms < 0.01) return -1;
-
-  // Find the best correlation
-  let lastCorrelation = 1;
-
-  for (let offset = 0; offset < MAX_SAMPLES; offset++) {
-    let correlation = 0;
-
-    for (let i = 0; i < MAX_SAMPLES; i++) {
-      correlation += Math.abs(buffer[i] - buffer[i + offset]);
-    }
-
-    correlation = 1 - correlation / MAX_SAMPLES;
-
-    if (correlation > 0.9 && correlation > lastCorrelation) {
-      const foundGoodCorrelation = correlation > best_correlation;
-
-      if (foundGoodCorrelation) {
-        best_correlation = correlation;
-        best_offset = offset;
-      }
-    }
-
-    lastCorrelation = correlation;
-  }
-
-  if (best_offset === -1) return -1;
-
-  const hz = sampleRate / best_offset;
-  return hz;
-}
-
-export default function PitchDetector({ audioBuffer, onPitchDetected, detectionMethod, onDetectionMethodChange }) {
+export default function PitchDetector({
+  audioBuffer,
+  onPitchDetected,
+  detectionMethod,
+  onDetectionMethodChange,
+}) {
   const [pitchData, setPitchData] = useState([]);
   const [isDetecting, setIsDetecting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -123,7 +81,6 @@ export default function PitchDetector({ audioBuffer, onPitchDetected, detectionM
   return (
     <div className="pitch-detector-container">
       <h2>🎼 Pitch Detection (Autocorrelation)</h2>
-
       <div className="detection-method-selector">
         <h3>Choose Pitch Detection Method:</h3>
         <div className="detection-methods">
@@ -157,11 +114,12 @@ export default function PitchDetector({ audioBuffer, onPitchDetected, detectionM
           </label>
         </div>
       </div>
-
       <button
         onClick={detectPitches}
         disabled={!audioBuffer || isDetecting}
-        className={`btn ${audioBuffer && !isDetecting ? "btn-primary" : "btn-disabled"}`}
+        className={`btn ${
+          audioBuffer && !isDetecting ? "btn-primary" : "btn-disabled"
+        }`}
       >
         {isDetecting ? `Detecting... ${progress}%` : "Detect Pitches"}
       </button>

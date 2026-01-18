@@ -5,13 +5,11 @@
   width: 100%;
   margin: 0 auto;
   padding: 0.5rem;
-  background: var(--gray-88);
   min-height: 100vh;
   box-sizing: border-box;
 }
 
 .app-container {
-  padding: 10px;
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
@@ -184,9 +182,6 @@
 
 /* Responsive design for tablets and larger */
 @media (min-width: 768px) {
-  .app-container {
-    padding: 0 20px 20px 20px;
-  }
 
   .app-title {
     font-size: 2rem;
@@ -218,10 +213,6 @@
 @media (max-width: 480px) {
   #root {
     padding: 0.25rem;
-  }
-
-  .app-container {
-    padding: 5px;
   }
 
   .app-title {

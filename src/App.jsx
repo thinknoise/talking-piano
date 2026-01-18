@@ -1,19 +1,18 @@
 import { useState } from "react";
 import AudioUploader from "./components/AudioUploader";
-import SpectrumVisualizer from "./components/SpectrumVisualizer";
 import Spectrogram from "./components/Spectrogram";
 import PitchDetector from "./components/PitchDetector";
 import SpectralPitchDetector from "./components/SpectralPitchDetector";
 import MIDIGenerator from "./components/MIDIGenerator";
 import MIDIPlayer from "./components/MIDIPlayer";
 import MicrophoneInput from "./components/MicrophoneInput";
+import WaveformVisualizer from "./components/WaveformVisualizer";
 import "./App.css";
 
 function App() {
   const [activeAudioBuffer, setActiveAudioBuffer] = useState(null);
   const [activeAudioContext, setActiveAudioContext] = useState(null);
   const [pitchData, setPitchData] = useState([]);
-  const [detectionMethod, setDetectionMethod] = useState("spectral"); // "autocorrelation" or "spectral"
   const [audioSource, setAudioSource] = useState(null); // "microphone" or "file"
   const [activeTab, setActiveTab] = useState("microphone"); // Current active tab
 
@@ -26,10 +25,6 @@ function App() {
 
   const handlePitchDetected = (pitches) => {
     setPitchData(pitches);
-    // Auto-navigate to MIDI tab after pitch detection completes
-    if (pitches.length > 0) {
-      setActiveTab("midi");
-    }
   };
 
   const handleMicrophonePitches = (pitches) => {
@@ -71,10 +66,10 @@ function App() {
           {activeAudioBuffer && (
             <>
               <button
-                className={`tab ${activeTab === "spectrum" ? "active" : ""}`}
-                onClick={() => setActiveTab("spectrum")}
+                className={`tab ${activeTab === "waveform" ? "active" : ""}`}
+                onClick={() => setActiveTab("waveform")}
               >
-                📊
+                〰️
               </button>
               <button
                 className={`tab ${activeTab === "spectrogram" ? "active" : ""}`}
@@ -84,20 +79,12 @@ function App() {
               </button>
             </>
           )}
-          {pitchData.length > 0 && (
-            <button
-              className={`tab ${activeTab === "midi" ? "active" : ""}`}
-              onClick={() => setActiveTab("midi")}
-            >
-              🎵
-            </button>
-          )}
         </div>
 
         <div className="tab-content">
           {activeTab === "microphone" && (
             <div className="section section-microphone">
-              <h2>🎤 Live Microphone Input</h2>
+              <h2>Microphone Input</h2>
               <p className="section-description">
                 Record audio from your microphone with real-time pitch detection
                 and visualization
@@ -111,7 +98,7 @@ function App() {
 
           {activeTab === "upload" && (
             <div className="section section-upload">
-              <h2>📁 Audio File Upload</h2>
+              <h2>Upload</h2>
               <p className="section-description">
                 Upload an audio file for spectrum analysis and pitch-to-MIDI
                 conversion
@@ -120,25 +107,34 @@ function App() {
             </div>
           )}
 
-          {activeTab === "spectrum" && activeAudioBuffer && (
+          {activeTab === "waveform" && activeAudioBuffer && (
             <div className="section section-analysis">
               <h2>
-                📊 Spectrum Visualizer
+                Waveform
                 {audioSource &&
                   ` (${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
               </h2>
 
-              <SpectrumVisualizer
-                audioBuffer={activeAudioBuffer}
-                audioContext={activeAudioContext}
-              />
+              <WaveformVisualizer audioBuffer={activeAudioBuffer} />
+
+              {pitchData.length > 0 && (
+                <MIDIPlayer
+                  pitchData={pitchData}
+                  downloadButton={
+                    <MIDIGenerator
+                      pitchData={pitchData}
+                      audioBuffer={activeAudioBuffer}
+                    />
+                  }
+                />
+              )}
             </div>
           )}
 
           {activeTab === "spectrogram" && activeAudioBuffer && (
             <div className="section section-analysis">
               <h2>
-                📈 Spectrogram
+                Spectrogram
                 {audioSource &&
                   ` (${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
               </h2>
@@ -151,20 +147,19 @@ function App() {
               <SpectralPitchDetector
                 audioBuffer={activeAudioBuffer}
                 onPitchDetected={handlePitchDetected}
-                detectionMethod={detectionMethod}
-                onDetectionMethodChange={setDetectionMethod}
               />
-            </div>
-          )}
 
-          {activeTab === "midi" && pitchData.length > 0 && (
-            <div className="section section-midi">
-              <h2>🎵 MIDI Generation & Playback</h2>
-              <MIDIPlayer pitchData={pitchData} />
-              <MIDIGenerator
-                pitchData={pitchData}
-                audioBuffer={activeAudioBuffer}
-              />
+              {pitchData.length > 0 && (
+                <MIDIPlayer
+                  pitchData={pitchData}
+                  downloadButton={
+                    <MIDIGenerator
+                      pitchData={pitchData}
+                      audioBuffer={activeAudioBuffer}
+                    />
+                  }
+                />
+              )}
             </div>
           )}
         </div>

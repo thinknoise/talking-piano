@@ -19,6 +19,25 @@
 
 .midi-player-controls {
   margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.midi-player-controls .instrument-selector {
+  min-width: 200px;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.midi-player-controls .instrument-selector:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .midi-player-loading {
