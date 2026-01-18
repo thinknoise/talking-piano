@@ -88,50 +88,20 @@ function App() {
             audioContext={activeAudioContext}
           />
 
-          <div className="detection-method-selector">
-            <h3>Choose Pitch Detection Method:</h3>
-            <div className="detection-methods">
-              <label className="detection-method-label">
-                <input
-                  type="radio"
-                  value="autocorrelation"
-                  checked={detectionMethod === "autocorrelation"}
-                  onChange={(e) => setDetectionMethod(e.target.value)}
-                />
-                <div>
-                  <strong>Autocorrelation (Simple)</strong>
-                  <p className="detection-method-info">
-                    Fast, monophonic (single note at a time), good for melodies
-                  </p>
-                </div>
-              </label>
-              <label className="detection-method-label">
-                <input
-                  type="radio"
-                  value="spectral"
-                  checked={detectionMethod === "spectral"}
-                  onChange={(e) => setDetectionMethod(e.target.value)}
-                />
-                <div>
-                  <strong>Spectral (Advanced)</strong>
-                  <p className="detection-method-info">
-                    Polyphonic (chords), velocity-sensitive, harmonic filtering
-                  </p>
-                </div>
-              </label>
-            </div>
-          </div>
-
           {detectionMethod === "autocorrelation" ? (
             <PitchDetector
               audioBuffer={activeAudioBuffer}
               audioContext={activeAudioContext}
               onPitchDetected={handlePitchDetected}
+              detectionMethod={detectionMethod}
+              onDetectionMethodChange={setDetectionMethod}
             />
           ) : (
             <SpectralPitchDetector
               audioBuffer={activeAudioBuffer}
               onPitchDetected={handlePitchDetected}
+              detectionMethod={detectionMethod}
+              onDetectionMethodChange={setDetectionMethod}
             />
           )}
         </div>

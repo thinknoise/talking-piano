@@ -113,7 +113,7 @@
 }
 
 .section-midi {
-  background: var(--gray-e8);
+  background: var(--gray-bc);
 }
 
 .section h2 {
@@ -126,44 +126,6 @@
   color: var(--gray-55);
   margin-bottom: 10px;
   font-size: 13px;
-}
-
-.detection-method-selector {
-  margin-bottom: 10px;
-  padding: 10px;
-  background: #fff;
-  border-radius: 6px;
-  border: 2px solid #666;
-}
-
-.detection-method-selector h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-}
-
-.detection-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.detection-method-label {
-  display: flex;
-  align-items: flex-start;
-  cursor: pointer;
-}
-
-.detection-method-label input {
-  margin-right: 6px;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.detection-method-info {
-  margin: 3px 0 0 0;
-  font-size: 11px;
-  color: #666;
 }
 
 /* Responsive design for tablets and larger */
@@ -195,20 +157,6 @@
   .section-description {
     font-size: 14px;
     margin-bottom: 12px;
-  }
-
-  .detection-methods {
-    flex-direction: row;
-    gap: 15px;
-  }
-
-  .detection-method-selector {
-    margin-bottom: 15px;
-    padding: 12px;
-  }
-
-  .detection-method-selector h3 {
-    font-size: 1.1rem;
   }
 }
 
