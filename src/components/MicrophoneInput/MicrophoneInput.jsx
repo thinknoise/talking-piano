@@ -58,7 +58,9 @@ export default function MicrophoneInput({
   const [error, setError] = useState("");
   const [livePlayback, setLivePlayback] = useState(false);
   const [instrument, setInstrument] = useState(null);
-  const [selectedInstrument, setSelectedInstrument] = useState("acoustic_grand_piano");
+  const [selectedInstrument, setSelectedInstrument] = useState(
+    "acoustic_grand_piano",
+  );
 
   const availableInstruments = [
     { value: "acoustic_grand_piano", label: "Acoustic Grand Piano" },
@@ -153,6 +155,14 @@ export default function MicrophoneInput({
   const pitchesRef = useRef([]);
   const currentNoteRef = useRef(null);
   const playbackAudioContextRef = useRef(null);
+  const statsIntervalRef = useRef(null);
+
+  const [liveStats, setLiveStats] = useState({
+    duration: 0,
+    minHz: 0,
+    maxHz: 0,
+    pitchCount: 0,
+  });
 
   // Load soundfont instrument on mount and when instrument changes
   useEffect(() => {
@@ -219,6 +229,19 @@ export default function MicrophoneInput({
       pitchesRef.current = [];
       setRecordedPitches([]);
 
+      // Start stats update interval (every second)
+      statsIntervalRef.current = setInterval(() => {
+        const pitches = pitchesRef.current;
+        if (pitches.length > 0) {
+          setLiveStats({
+            duration: parseFloat(pitches[pitches.length - 1]?.time || 0),
+            minHz: Math.min(...pitches.map((p) => p.hz)),
+            maxHz: Math.max(...pitches.map((p) => p.hz)),
+            pitchCount: pitches.length,
+          });
+        }
+      }, 1000);
+
       // Start visualization and pitch detection loop
       analyze();
     } catch (err) {
@@ -234,6 +257,18 @@ export default function MicrophoneInput({
 
   const stopRecording = async () => {
     setIsRecording(false);
+
+    // Stop any currently playing MIDI note
+    if (instrument && currentNoteRef.current !== null) {
+      instrument.stop();
+      currentNoteRef.current = null;
+    }
+
+    // Stop stats interval
+    if (statsIntervalRef.current) {
+      clearInterval(statsIntervalRef.current);
+      statsIntervalRef.current = null;
+    }
 
     // Stop animation
     if (animationRef.current) {
@@ -448,7 +483,7 @@ export default function MicrophoneInput({
         <div className="controls-section">
           {!isRecording ? (
             <button onClick={startRecording} className="btn btn-danger">
-              Start Recording
+              {livePlayback ? "Fuck it! Do it LIVE!" : "Start Recording"}
             </button>
           ) : (
             <button onClick={stopRecording} className="btn btn-primary">
@@ -459,25 +494,31 @@ export default function MicrophoneInput({
         {/* Section 4: Stats */}
         <div className="stats-section">
           {isRecording && (
-            <span className="recording-status">
-              ● RECORDING - {pitchesRef.current.length}
-              pitches detected
-            </span>
+            <div className="recording-results">
+              <p className="result-title">
+                ● RECORDING - {liveStats.pitchCount} pitches detected
+              </p>
+              <p className="result-details">
+                Duration: {liveStats.duration.toFixed(1)}s
+                {liveStats.minHz > 0 && (
+                  <>
+                    {" | "}
+                    Range: {Math.round(liveStats.minHz)}Hz -{" "}
+                    {Math.round(liveStats.maxHz)}Hz
+                  </>
+                )}
+              </p>
+            </div>
           )}
           {recordedPitches.length > 0 && !isRecording && (
             <div className="recording-results">
               <p className="result-title">
-                ✓ Recorded {recordedPitches.length}
-                pitch samples
+                ✓ Recorded {recordedPitches.length} pitch samples
               </p>
               <p className="result-details">
                 Duration: {recordedPitches[recordedPitches.length - 1]?.time}s |
-                Range: {Math.min(...recordedPitches.map((p) => p.hz))}
-                Hz - {Math.max(...recordedPitches.map((p) => p.hz))}
-                Hz
-              </p>
-              <p className="result-note">
-                You can now generate MIDI from this recording !
+                Range: {Math.min(...recordedPitches.map((p) => p.hz))}Hz -{" "}
+                {Math.max(...recordedPitches.map((p) => p.hz))}Hz
               </p>
             </div>
           )}
