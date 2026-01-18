@@ -1,52 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
+import { availableInstruments } from "../../constants/instruments";
+import { autoCorrelate, hzToMidi } from "../../utils/pitchDetection";
 import "./MicrophoneInput.css";
-
-// Autocorrelation pitch detection (same as PitchDetector)
-function autoCorrelate(buffer, sampleRate) {
-  const SIZE = buffer.length;
-  const MAX_SAMPLES = Math.floor(SIZE / 2);
-  let best_offset = -1;
-  let best_correlation = 0;
-  let rms = 0;
-
-  for (let i = 0; i < SIZE; i++) {
-    const val = buffer[i];
-    rms += val * val;
-  }
-
-  rms = Math.sqrt(rms / SIZE);
-
-  if (rms < 0.0005) return -1;
-
-  let lastCorrelation = 1;
-
-  for (let offset = 0; offset < MAX_SAMPLES; offset++) {
-    let correlation = 0;
-
-    for (let i = 0; i < MAX_SAMPLES; i++) {
-      correlation += Math.abs(buffer[i] - buffer[i + offset]);
-    }
-
-    correlation = 1 - correlation / MAX_SAMPLES;
-
-    if (correlation > 0.9 && correlation > lastCorrelation) {
-      const foundGoodCorrelation = correlation > best_correlation;
-
-      if (foundGoodCorrelation) {
-        best_correlation = correlation;
-        best_offset = offset;
-      }
-    }
-
-    lastCorrelation = correlation;
-  }
-
-  if (best_offset === -1) return -1;
-
-  const hz = sampleRate / best_offset;
-  return hz;
-}
 
 export default function MicrophoneInput({
   onPitchesRecorded,
@@ -58,91 +14,7 @@ export default function MicrophoneInput({
   const [error, setError] = useState("");
   const [livePlayback, setLivePlayback] = useState(false);
   const [instrument, setInstrument] = useState(null);
-  const [selectedInstrument, setSelectedInstrument] = useState(
-    "acoustic_grand_piano",
-  );
-
-  const availableInstruments = [
-    { value: "acoustic_grand_piano", label: "Acoustic Grand Piano" },
-    { value: "bright_acoustic_piano", label: "Bright Acoustic Piano" },
-    { value: "electric_grand_piano", label: "Electric Grand Piano" },
-    { value: "honkytonk_piano", label: "Honky-tonk Piano" },
-    { value: "electric_piano_1", label: "Electric Piano 1" },
-    { value: "electric_piano_2", label: "Electric Piano 2" },
-    { value: "harpsichord", label: "Harpsichord" },
-    { value: "clavinet", label: "Clavinet" },
-    { value: "celesta", label: "Celesta" },
-    { value: "glockenspiel", label: "Glockenspiel" },
-    { value: "music_box", label: "Music Box" },
-    { value: "vibraphone", label: "Vibraphone" },
-    { value: "marimba", label: "Marimba" },
-    { value: "xylophone", label: "Xylophone" },
-    { value: "tubular_bells", label: "Tubular Bells" },
-    { value: "dulcimer", label: "Dulcimer" },
-    { value: "drawbar_organ", label: "Drawbar Organ" },
-    { value: "percussive_organ", label: "Percussive Organ" },
-    { value: "rock_organ", label: "Rock Organ" },
-    { value: "church_organ", label: "Church Organ" },
-    { value: "reed_organ", label: "Reed Organ" },
-    { value: "accordion", label: "Accordion" },
-    { value: "harmonica", label: "Harmonica" },
-    { value: "tango_accordion", label: "Tango Accordion" },
-    { value: "acoustic_guitar_nylon", label: "Acoustic Guitar (nylon)" },
-    { value: "acoustic_guitar_steel", label: "Acoustic Guitar (steel)" },
-    { value: "electric_guitar_jazz", label: "Electric Guitar (jazz)" },
-    { value: "electric_guitar_clean", label: "Electric Guitar (clean)" },
-    { value: "electric_guitar_muted", label: "Electric Guitar (muted)" },
-    { value: "overdriven_guitar", label: "Overdriven Guitar" },
-    { value: "distortion_guitar", label: "Distortion Guitar" },
-    { value: "acoustic_bass", label: "Acoustic Bass" },
-    { value: "electric_bass_finger", label: "Electric Bass (finger)" },
-    { value: "electric_bass_pick", label: "Electric Bass (pick)" },
-    { value: "fretless_bass", label: "Fretless Bass" },
-    { value: "slap_bass_1", label: "Slap Bass 1" },
-    { value: "slap_bass_2", label: "Slap Bass 2" },
-    { value: "synth_bass_1", label: "Synth Bass 1" },
-    { value: "synth_bass_2", label: "Synth Bass 2" },
-    { value: "violin", label: "Violin" },
-    { value: "viola", label: "Viola" },
-    { value: "cello", label: "Cello" },
-    { value: "contrabass", label: "Contrabass" },
-    { value: "tremolo_strings", label: "Tremolo Strings" },
-    { value: "pizzicato_strings", label: "Pizzicato Strings" },
-    { value: "orchestral_harp", label: "Orchestral Harp" },
-    { value: "timpani", label: "Timpani" },
-    { value: "string_ensemble_1", label: "String Ensemble 1" },
-    { value: "string_ensemble_2", label: "String Ensemble 2" },
-    { value: "synthstrings_1", label: "SynthStrings 1" },
-    { value: "synthstrings_2", label: "SynthStrings 2" },
-    { value: "choir_aahs", label: "Choir Aahs" },
-    { value: "voice_oohs", label: "Voice Oohs" },
-    { value: "synth_voice", label: "Synth Voice" },
-    { value: "orchestra_hit", label: "Orchestra Hit" },
-    { value: "trumpet", label: "Trumpet" },
-    { value: "trombone", label: "Trombone" },
-    { value: "tuba", label: "Tuba" },
-    { value: "muted_trumpet", label: "Muted Trumpet" },
-    { value: "french_horn", label: "French Horn" },
-    { value: "brass_section", label: "Brass Section" },
-    { value: "synthbrass_1", label: "SynthBrass 1" },
-    { value: "synthbrass_2", label: "SynthBrass 2" },
-    { value: "soprano_sax", label: "Soprano Sax" },
-    { value: "alto_sax", label: "Alto Sax" },
-    { value: "tenor_sax", label: "Tenor Sax" },
-    { value: "baritone_sax", label: "Baritone Sax" },
-    { value: "oboe", label: "Oboe" },
-    { value: "english_horn", label: "English Horn" },
-    { value: "bassoon", label: "Bassoon" },
-    { value: "clarinet", label: "Clarinet" },
-    { value: "piccolo", label: "Piccolo" },
-    { value: "flute", label: "Flute" },
-    { value: "recorder", label: "Recorder" },
-    { value: "pan_flute", label: "Pan Flute" },
-    { value: "blown_bottle", label: "Blown Bottle" },
-    { value: "shakuhachi", label: "Shakuhachi" },
-    { value: "whistle", label: "Whistle" },
-    { value: "ocarina", label: "Ocarina" },
-  ];
+  const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
 
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -167,11 +39,23 @@ export default function MicrophoneInput({
   // Load soundfont instrument on mount and when instrument changes
   useEffect(() => {
     const loadInstrument = async () => {
-      if (playbackAudioContextRef.current) {
-        playbackAudioContextRef.current.close();
+      // Don't close the context when changing instruments, just create new instrument with existing context
+      if (
+        !playbackAudioContextRef.current ||
+        playbackAudioContextRef.current.state === "closed"
+      ) {
+        playbackAudioContextRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
       }
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      playbackAudioContextRef.current = ac;
+
+      const ac = playbackAudioContextRef.current;
+
+      // Resume AudioContext if it's suspended (required by browsers for autoplay policy)
+      if (ac.state === "suspended") {
+        await ac.resume();
+      }
+
       const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
@@ -179,9 +63,7 @@ export default function MicrophoneInput({
     loadInstrument();
 
     return () => {
-      if (playbackAudioContextRef.current) {
-        playbackAudioContextRef.current.close();
-      }
+      // Don't close context on cleanup - let it persist
     };
   }, [selectedInstrument]);
 
@@ -189,9 +71,14 @@ export default function MicrophoneInput({
     try {
       setError("");
 
-      // Request microphone access
+      // Request microphone access with high quality settings
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          sampleRate: 48000,
+        },
       });
       micStreamRef.current = stream;
 
@@ -289,20 +176,24 @@ export default function MicrophoneInput({
             type: "audio/webm",
           });
 
-          // Convert to AudioBuffer
-          try {
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            const audioContext = new (
-              window.AudioContext || window.webkitAudioContext
-            )();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          // Only process if we have audio data
+          if (audioBlob.size > 0) {
+            // Convert to AudioBuffer - create a new context for playback
+            try {
+              const arrayBuffer = await audioBlob.arrayBuffer();
+              const playbackContext = new (
+                window.AudioContext || window.webkitAudioContext
+              )();
+              const audioBuffer =
+                await playbackContext.decodeAudioData(arrayBuffer);
 
-            // Send to parent for spectrogram analysis
-            if (onAudioRecorded) {
-              onAudioRecorded(audioBuffer, audioContext);
+              // Send to parent for spectrogram analysis with the new playback context
+              if (onAudioRecorded) {
+                onAudioRecorded(audioBuffer, playbackContext);
+              }
+            } catch (err) {
+              console.error("Failed to decode recorded audio:", err);
             }
-          } catch (err) {
-            console.error("Failed to decode recorded audio:", err);
           }
 
           resolve();
@@ -315,8 +206,8 @@ export default function MicrophoneInput({
       micStreamRef.current.getTracks().forEach((track) => track.stop());
     }
 
-    // Close audio context
-    if (audioContextRef.current) {
+    // Close the recording audio context (not the playback context)
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close();
     }
 
@@ -360,7 +251,7 @@ export default function MicrophoneInput({
 
       // Live MIDI playback
       if (livePlayback && instrument) {
-        const midiNote = Math.round(69 + 12 * Math.log2(hz / 440));
+        const midiNote = hzToMidi(hz);
 
         // If note changed, stop previous and play new
         if (currentNoteRef.current !== midiNote) {
@@ -372,7 +263,7 @@ export default function MicrophoneInput({
             midiNote,
             playbackAudioContextRef.current.currentTime,
             {
-              gain: 0.3,
+              gain: 1.0,
             },
           );
           currentNoteRef.current = midiNote;
@@ -493,7 +384,7 @@ export default function MicrophoneInput({
         </div>
         {/* Section 4: Stats */}
         <div className="stats-section">
-          {isRecording && (
+          {isRecording ? (
             <div className="recording-results">
               <p className="result-title">
                 ● RECORDING - {liveStats.pitchCount} pitches detected
@@ -509,8 +400,7 @@ export default function MicrophoneInput({
                 )}
               </p>
             </div>
-          )}
-          {recordedPitches.length > 0 && !isRecording && (
+          ) : recordedPitches.length > 0 ? (
             <div className="recording-results">
               <p className="result-title">
                 ✓ Recorded {recordedPitches.length} pitch samples
@@ -520,6 +410,11 @@ export default function MicrophoneInput({
                 Range: {Math.min(...recordedPitches.map((p) => p.hz))}Hz -{" "}
                 {Math.max(...recordedPitches.map((p) => p.hz))}Hz
               </p>
+            </div>
+          ) : (
+            <div className="recording-results">
+              <p className="result-title">Ready to record</p>
+              <p className="result-details">Press Start Recording to begin</p>
             </div>
           )}
         </div>

@@ -155,29 +155,13 @@ export default function MIDIGenerator({ pitchData }) {
   const hasPitchData = pitchData && pitchData.length > 0;
 
   return (
-    <div className="midi-generator-container">
-      <h2>MIDI Generation</h2>
-      <button
-        onClick={generateMIDI}
-        disabled={!hasPitchData || isGenerating}
-        className={`btn ${hasPitchData && !isGenerating ? "btn-primary" : "btn-disabled"}`}
-      >
-        {isGenerating ? "Generating..." : "💾 Generate MIDI File"}
-      </button>
-      {hasPitchData && (
-        <div className="midi-generator-info">
-          <p>✓ Ready to generate MIDI from {pitchData.length} pitch samples</p>
-          <p>
-            This will create a MIDI file where each detected pitch becomes a
-            MIDI note with accurate timing at 120 BPM.
-          </p>
-        </div>
-      )}
-      {!hasPitchData && (
-        <p className="midi-generator-disabled-message">
-          Detect pitches first to enable MIDI generation
-        </p>
-      )}
-    </div>
+    <button
+      onClick={generateMIDI}
+      disabled={!hasPitchData || isGenerating}
+      className="midi-download-button"
+      title={isGenerating ? "Generating..." : "Download MIDI file"}
+    >
+      💾
+    </button>
   );
 }

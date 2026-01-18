@@ -1,0 +1,55 @@
+.waveform-container {
+  margin: 10px 0;
+}
+
+.waveform-canvas-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.waveform-canvas {
+  width: 100%;
+  height: auto;
+  border: 2px solid var(--gray-55);
+  border-radius: 6px;
+  background: #000;
+  display: block;
+}
+
+.waveform-play-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.waveform-play-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.waveform-play-button:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.waveform-play-button:focus {
+  outline: none;
+}
+
+.waveform-description {
+  font-size: 12px;
+  color: var(--gray-55);
+  margin: 5px 0;
+}

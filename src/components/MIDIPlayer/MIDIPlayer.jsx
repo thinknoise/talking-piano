@@ -1,33 +1,59 @@
 import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
+import { availableInstruments } from "../../constants/instruments";
+import { hzToMidi } from "../../utils/pitchDetection";
 import "./MIDIPlayer.css";
 
-export default function MIDIPlayer({ pitchData }) {
+export default function MIDIPlayer({ pitchData, downloadButton }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [instrument, setInstrument] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
   const audioContextRef = useRef(null);
   const playbackRef = useRef(null);
 
   useEffect(() => {
-    // Initialize AudioContext and load instrument
-    const initAudio = async () => {
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      audioContextRef.current = ac;
+    // Initialize AudioContext once
+    if (
+      !audioContextRef.current ||
+      audioContextRef.current.state === "closed"
+    ) {
+      audioContextRef.current = new (
+        window.AudioContext || window.webkitAudioContext
+      )();
+    }
 
-      // Load acoustic grand piano soundfont
-      const instr = await Soundfont.instrument(ac, "acoustic_grand_piano");
+    return () => {
+      // Don't close on every unmount in development (Strict Mode double-mounting)
+      // Only close when truly unmounting
+    };
+  }, []);
+
+  useEffect(() => {
+    // Load instrument when selection changes
+    const loadInstrument = async () => {
+      if (
+        !audioContextRef.current ||
+        audioContextRef.current.state === "closed"
+      ) {
+        audioContextRef.current = new (
+          window.AudioContext || window.webkitAudioContext
+        )();
+      }
+
+      const ac = audioContextRef.current;
+
+      // Resume AudioContext if it's suspended
+      if (ac.state === "suspended") {
+        await ac.resume();
+      }
+
+      const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
 
-    initAudio();
-
-    return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, []);
+    loadInstrument();
+  }, [selectedInstrument]);
 
   const playMIDI = async () => {
     if (!instrument || !pitchData || pitchData.length === 0) return;
@@ -38,7 +64,7 @@ export default function MIDIPlayer({ pitchData }) {
     // Convert Hz to MIDI note numbers
     const notes = pitchData.map((pitch) => {
       const hz = pitch.hz;
-      const midiNote = Math.round(69 + 12 * Math.log2(hz / 440));
+      const midiNote = hzToMidi(hz);
 
       return {
         time: parseFloat(pitch.time),
@@ -129,10 +155,19 @@ export default function MIDIPlayer({ pitchData }) {
   return (
     <div className="midi-player-container">
       <h3>🎹 MIDI Player</h3>
-      <p className="midi-player-description">
-        Play your detected pitches as MIDI audio in the browser
-      </p>
       <div className="midi-player-controls">
+        <select
+          value={selectedInstrument}
+          onChange={(e) => setSelectedInstrument(e.target.value)}
+          disabled={isPlaying}
+          className="instrument-selector"
+        >
+          {availableInstruments.map((instr) => (
+            <option key={instr.value} value={instr.value}>
+              {instr.label}
+            </option>
+          ))}
+        </select>
         {!isPlaying ? (
           <button
             onClick={playMIDI}
@@ -146,10 +181,9 @@ export default function MIDIPlayer({ pitchData }) {
             ⏹ Stop
           </button>
         )}
+        {downloadButton}
         {!instrument && (
-          <span className="midi-player-loading">
-            Loading piano soundfont...
-          </span>
+          <span className="midi-player-loading">Loading soundfont...</span>
         )}
       </div>
       {isPlaying && (
@@ -164,7 +198,11 @@ export default function MIDIPlayer({ pitchData }) {
         </div>
       )}
       <p className="midi-player-info">
-        Using acoustic grand piano soundfont • {pitchData.length} pitch samples
+        Using
+        {availableInstruments
+          .find((i) => i.value === selectedInstrument)
+          ?.label.toLowerCase()}
+        soundfont • {pitchData.length} pitch samples
       </p>
     </div>
   );
