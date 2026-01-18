@@ -247,13 +247,8 @@ export default function SpectralPitchDetector({
         disabled={!audioBuffer || isDetecting}
         className="detect-button"
       >
-        {" "}
         {isDetecting
-          ? `Analyzing... $ {
-        progress
-      }
-
-      %`
+          ? `Analyzing... ${progress}%`
           : "🔬 Detect Polyphonic Pitches"}
       </button>{" "}
       {isDetecting && (
@@ -263,13 +258,7 @@ export default function SpectralPitchDetector({
             {" "}
             <div
               className="progress-fill"
-              style={{
-                width: `$ {
-              progress
-            }
-
-            %`,
-              }}
+              style={{ width: `${progress}%` }}
             />{" "}
           </div>{" "}
         </div>
