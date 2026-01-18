@@ -10,16 +10,16 @@ import MicrophoneInput from "./components/MicrophoneInput";
 import "./App.css";
 
 function App() {
-  const [audioBuffer, setAudioBuffer] = useState(null);
-  const [audioContext, setAudioContext] = useState(null);
+  const [activeAudioBuffer, setActiveAudioBuffer] = useState(null);
+  const [activeAudioContext, setActiveAudioContext] = useState(null);
   const [pitchData, setPitchData] = useState([]);
-  const [recordedAudioBuffer, setRecordedAudioBuffer] = useState(null);
-  const [recordedAudioContext, setRecordedAudioContext] = useState(null);
   const [detectionMethod, setDetectionMethod] = useState("spectral"); // "autocorrelation" or "spectral"
+  const [audioSource, setAudioSource] = useState(null); // "microphone" or "file"
 
   const handleAudioLoaded = (buffer, context) => {
-    setAudioBuffer(buffer);
-    setAudioContext(context);
+    setActiveAudioBuffer(buffer);
+    setActiveAudioContext(context);
+    setAudioSource("file");
     setPitchData([]); // Reset pitch data when new audio is loaded
   };
 
@@ -32,182 +32,119 @@ function App() {
   };
 
   const handleRecordedAudio = (buffer, context) => {
-    setRecordedAudioBuffer(buffer);
-    setRecordedAudioContext(context);
+    setActiveAudioBuffer(buffer);
+    setActiveAudioContext(context);
+    setAudioSource("microphone");
+    setPitchData([]); // Reset pitch data when new recording is made
   };
 
   return (
-    <div style={{ padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
-      <h1>🎹 Talking Piano</h1>
-      <p style={{ fontSize: "18px", color: "#555", marginBottom: "30px" }}>
-        Audio Spectrum Analyzer & Pitch-to-MIDI Converter
-      </p>
+    <div className="app-container">
+      <h1 className="app-title">
+        <span className="title-container">
+          <span className="title-text title-primary">🗣🎹 Talking Piano</span>
+          <span className="title-text title-alternate">
+            🗣🧥 Singing Jacket
+          </span>
+        </span>
+      </h1>
 
-      <div
-        style={{
-          marginBottom: "40px",
-          padding: "20px",
-          background: "#f0f8ff",
-          borderRadius: "8px",
-          border: "2px solid #4a90e2",
-        }}
-      >
+      <div className="section section-microphone">
         <h2>🎤 Live Microphone Input</h2>
-        <p style={{ color: "#555", marginBottom: "15px" }}>
+        <p className="section-description">
           Record audio from your microphone with real-time pitch detection and
           visualization
         </p>
-        <MicrophoneInput 
+        <MicrophoneInput
           onPitchesRecorded={handleMicrophonePitches}
           onAudioRecorded={handleRecordedAudio}
         />
-        
-        {recordedAudioBuffer && (
-          <>
-            <Spectrogram
-              audioBuffer={recordedAudioBuffer}
-              audioContext={recordedAudioContext}
-            />
-            
-            <div style={{ marginBottom: "20px", padding: "15px", background: "#fff", borderRadius: "8px", border: "2px solid #666" }}>
-              <h3 style={{ marginTop: 0 }}>Choose Pitch Detection Method:</h3>
-              <div style={{ display: "flex", gap: "20px" }}>
-                <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <input
-                    type="radio"
-                    value="autocorrelation"
-                    checked={detectionMethod === "autocorrelation"}
-                    onChange={(e) => setDetectionMethod(e.target.value)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  <div>
-                    <strong>Autocorrelation (Simple)</strong>
-                    <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#666" }}>
-                      Fast, monophonic (single note at a time)
-                    </p>
-                  </div>
-                </label>
-                <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <input
-                    type="radio"
-                    value="spectral"
-                    checked={detectionMethod === "spectral"}
-                    onChange={(e) => setDetectionMethod(e.target.value)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  <div>
-                    <strong>Spectral (Advanced)</strong>
-                    <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#666" }}>
-                      Polyphonic (chords), velocity-sensitive
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {detectionMethod === "autocorrelation" ? (
-              <PitchDetector
-                audioBuffer={recordedAudioBuffer}
-                audioContext={recordedAudioContext}
-                onPitchDetected={handlePitchDetected}
-              />
-            ) : (
-              <SpectralPitchDetector
-                audioBuffer={recordedAudioBuffer}
-                onPitchDetected={handlePitchDetected}
-              />
-            )}
-          </>
-        )}
       </div>
 
-      <div
-        style={{
-          marginBottom: "40px",
-          padding: "20px",
-          background: "#fff7e6",
-          borderRadius: "8px",
-          border: "2px solid #ffa500",
-        }}
-      >
+      <div className="section section-upload">
+        <h2>📁 Audio File Upload</h2>
+        <p className="section-description">
+          Upload an audio file for spectrum analysis and pitch-to-MIDI
+          conversion
+        </p>
         <AudioUploader onAudioLoaded={handleAudioLoaded} />
-
-        {audioBuffer && (
-          <>
-            <SpectrumVisualizer
-              audioBuffer={audioBuffer}
-              audioContext={audioContext}
-            />
-            <Spectrogram
-              audioBuffer={audioBuffer}
-              audioContext={audioContext}
-            />
-            
-            <div style={{ marginBottom: "20px", padding: "15px", background: "#fff", borderRadius: "8px", border: "2px solid #666" }}>
-              <h3 style={{ marginTop: 0 }}>Choose Pitch Detection Method:</h3>
-              <div style={{ display: "flex", gap: "20px" }}>
-                <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <input
-                    type="radio"
-                    value="autocorrelation"
-                    checked={detectionMethod === "autocorrelation"}
-                    onChange={(e) => setDetectionMethod(e.target.value)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  <div>
-                    <strong>Autocorrelation (Simple)</strong>
-                    <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#666" }}>
-                      Fast, monophonic (single note at a time), good for melodies
-                    </p>
-                  </div>
-                </label>
-                <label style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                  <input
-                    type="radio"
-                    value="spectral"
-                    checked={detectionMethod === "spectral"}
-                    onChange={(e) => setDetectionMethod(e.target.value)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  <div>
-                    <strong>Spectral (Advanced)</strong>
-                    <p style={{ margin: "5px 0 0 0", fontSize: "12px", color: "#666" }}>
-                      Polyphonic (chords), velocity-sensitive, harmonic filtering
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {detectionMethod === "autocorrelation" ? (
-              <PitchDetector
-                audioBuffer={audioBuffer}
-                audioContext={audioContext}
-                onPitchDetected={handlePitchDetected}
-              />
-            ) : (
-              <SpectralPitchDetector
-                audioBuffer={audioBuffer}
-                onPitchDetected={handlePitchDetected}
-              />
-            )}
-          </>
-        )}
       </div>
+
+      {activeAudioBuffer && (
+        <div className="section section-analysis">
+          <h2>
+            📊 Audio Analysis{" "}
+            {audioSource &&
+              `(${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
+          </h2>
+
+          <SpectrumVisualizer
+            audioBuffer={activeAudioBuffer}
+            audioContext={activeAudioContext}
+          />
+
+          <Spectrogram
+            audioBuffer={activeAudioBuffer}
+            audioContext={activeAudioContext}
+          />
+
+          <div className="detection-method-selector">
+            <h3>Choose Pitch Detection Method:</h3>
+            <div className="detection-methods">
+              <label className="detection-method-label">
+                <input
+                  type="radio"
+                  value="autocorrelation"
+                  checked={detectionMethod === "autocorrelation"}
+                  onChange={(e) => setDetectionMethod(e.target.value)}
+                />
+                <div>
+                  <strong>Autocorrelation (Simple)</strong>
+                  <p className="detection-method-info">
+                    Fast, monophonic (single note at a time), good for melodies
+                  </p>
+                </div>
+              </label>
+              <label className="detection-method-label">
+                <input
+                  type="radio"
+                  value="spectral"
+                  checked={detectionMethod === "spectral"}
+                  onChange={(e) => setDetectionMethod(e.target.value)}
+                />
+                <div>
+                  <strong>Spectral (Advanced)</strong>
+                  <p className="detection-method-info">
+                    Polyphonic (chords), velocity-sensitive, harmonic filtering
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {detectionMethod === "autocorrelation" ? (
+            <PitchDetector
+              audioBuffer={activeAudioBuffer}
+              audioContext={activeAudioContext}
+              onPitchDetected={handlePitchDetected}
+            />
+          ) : (
+            <SpectralPitchDetector
+              audioBuffer={activeAudioBuffer}
+              onPitchDetected={handlePitchDetected}
+            />
+          )}
+        </div>
+      )}
 
       {pitchData.length > 0 && (
-        <div
-          style={{
-            marginBottom: "40px",
-            padding: "20px",
-            background: "#e8ffe8",
-            borderRadius: "8px",
-            border: "2px solid #4caf50",
-          }}
-        >
+        <div className="section section-midi">
           <h2>🎵 MIDI Generation & Playback</h2>
           <MIDIPlayer pitchData={pitchData} />
-          <MIDIGenerator pitchData={pitchData} audioBuffer={audioBuffer} />
+          <MIDIGenerator
+            pitchData={pitchData}
+            audioBuffer={activeAudioBuffer}
+          />
         </div>
       )}
     </div>

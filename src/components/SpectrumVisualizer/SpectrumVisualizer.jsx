@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import "./SpectrumVisualizer.css";
 
 export default function SpectrumVisualizer({ audioBuffer, audioContext }) {
   const canvasRef = useRef(null);
@@ -66,7 +67,7 @@ export default function SpectrumVisualizer({ audioBuffer, audioContext }) {
       ctx.fillText(
         `${Math.round(nyquist / 2)} Hz`,
         width / 2 - 30,
-        height - 10
+        height - 10,
       );
       ctx.fillText(`${Math.round(nyquist)} Hz`, width - 80, height - 10);
     };
@@ -98,51 +99,29 @@ export default function SpectrumVisualizer({ audioBuffer, audioContext }) {
   }, []);
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#f0f0f0",
-        borderRadius: "8px",
-        marginBottom: "20px",
-      }}
-    >
+    <div className="spectrum-visualizer-container">
       <h2>Spectrum Visualization</h2>
       <canvas
         ref={canvasRef}
         width={800}
         height={300}
-        style={{
-          border: "2px solid #333",
-          borderRadius: "4px",
-          display: "block",
-          marginBottom: "10px",
-          background: "#000",
-        }}
+        className="canvas canvas-small"
       />
       <button
         onClick={analyze}
         disabled={!audioBuffer || isAnalyzing}
-        style={{
-          padding: "10px 20px",
-          marginRight: "10px",
-          fontSize: "16px",
-          cursor: audioBuffer && !isAnalyzing ? "pointer" : "not-allowed",
-        }}
+        className={`btn ${audioBuffer && !isAnalyzing ? "btn-primary" : "btn-disabled"}`}
       >
         {isAnalyzing ? "Analyzing..." : "Analyze & Play"}
       </button>
       <button
         onClick={stop}
         disabled={!isAnalyzing}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          cursor: isAnalyzing ? "pointer" : "not-allowed",
-        }}
+        className={`btn ${isAnalyzing ? "btn-secondary" : "btn-disabled"}`}
       >
         Stop
       </button>
-      <p style={{ marginTop: "10px", fontSize: "14px", color: "#666" }}>
+      <p className="spectrum-algorithm-note">
         This shows the real-time frequency spectrum (0-22kHz). Taller bars =
         louder frequencies.
       </p>

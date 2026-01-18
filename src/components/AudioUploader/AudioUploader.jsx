@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./AudioUploader.css";
 
 export default function AudioUploader({ onAudioLoaded }) {
   const [fileName, setFileName] = useState("");
@@ -16,15 +17,16 @@ export default function AudioUploader({ onAudioLoaded }) {
       const arrayBuffer = await file.arrayBuffer();
 
       // Decode audio data
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      const audioContext = new (
+        window.AudioContext || window.webkitAudioContext
+      )();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
       onAudioLoaded(audioBuffer, audioContext);
     } catch (err) {
       console.error("Audio decoding error:", err);
       setError(
-        `Failed to decode audio file. Please try a different format (WAV, MP3, OGG, etc.). Error: ${err.message}`
+        `Failed to decode audio file. Please try a different format (WAV, MP3, OGG, etc.). Error: ${err.message}`,
       );
       setFileName("");
     }
@@ -33,12 +35,10 @@ export default function AudioUploader({ onAudioLoaded }) {
   return (
     <div>
       <input type="file" accept="audio/*" onChange={handleFileChange} />
-      {fileName && <span style={{ color: "green" }}>Loaded: {fileName}</span>}
-      {error && (
-        <div style={{ color: "red", marginTop: "10px", fontSize: "14px" }}>
-          {error}
-        </div>
+      {fileName && (
+        <span className="audio-uploader-success">Loaded: {fileName}</span>
       )}
+      {error && <div className="message message-error mt-10">{error}</div>}
     </div>
   );
 }

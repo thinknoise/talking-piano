@@ -1,0 +1,22 @@
+@import '../../shared.css';
+
+.spectrum-visualizer-container {
+  padding: 20px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.spectrum-visualizer-container h2 {
+  margin-top: 0;
+}
+
+.spectrum-visualizer-container .btn {
+  margin-right: 10px;
+}
+
+.spectrum-algorithm-note {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}

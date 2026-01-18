@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
+import "./MIDIPlayer.css";
 
 export default function MIDIPlayer({ pitchData }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,6 +39,7 @@ export default function MIDIPlayer({ pitchData }) {
     const notes = pitchData.map((pitch) => {
       const hz = pitch.hz;
       const midiNote = Math.round(69 + 12 * Math.log2(hz / 440));
+
       return {
         time: parseFloat(pitch.time),
         midi: midiNote,
@@ -53,6 +55,7 @@ export default function MIDIPlayer({ pitchData }) {
 
     for (let i = 0; i < notes.length; i++) {
       const note = notes[i];
+
       if (note.time - currentTime < timeWindowSize) {
         currentGroup.push(note);
       } else {
@@ -62,6 +65,7 @@ export default function MIDIPlayer({ pitchData }) {
             notes: currentGroup,
           });
         }
+
         currentGroup = [note];
         currentTime = note.time;
       }
@@ -78,7 +82,9 @@ export default function MIDIPlayer({ pitchData }) {
     const startTime = audioContextRef.current.currentTime;
     const totalDuration = noteGroups[noteGroups.length - 1]?.time || 0;
 
-    playbackRef.current = { active: true };
+    playbackRef.current = {
+      active: true,
+    };
 
     for (let i = 0; i < noteGroups.length; i++) {
       if (!playbackRef.current?.active) break;
@@ -88,7 +94,9 @@ export default function MIDIPlayer({ pitchData }) {
 
       // Play all notes in the group as a chord
       group.notes.forEach((note) => {
-        instrument.play(note.midi, playTime, { duration: 0.2 });
+        instrument.play(note.midi, playTime, {
+          duration: 0.2,
+        });
       });
 
       // Update progress
@@ -109,6 +117,7 @@ export default function MIDIPlayer({ pitchData }) {
     if (playbackRef.current) {
       playbackRef.current.active = false;
     }
+
     setIsPlaying(false);
     setProgress(0);
   };
@@ -118,103 +127,52 @@ export default function MIDIPlayer({ pitchData }) {
   }
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#f0f0f0",
-        borderRadius: "8px",
-        marginTop: "20px",
-      }}
-    >
-      <h3>🎹 MIDI Player</h3>
-      <p style={{ fontSize: "14px", color: "#666", marginBottom: "15px" }}>
-        Play your detected pitches as MIDI audio in the browser
-      </p>
-
-      <div style={{ marginBottom: "15px" }}>
+    <div className="midi-player-container">
+      {" "}
+      <h3>🎹 MIDI Player</h3>{" "}
+      <p className="midi-player-description">
+        {" "}
+        Play your detected pitches as MIDI audio in the browser{" "}
+      </p>{" "}
+      <div className="midi-player-controls">
+        {" "}
         {!isPlaying ? (
           <button
             onClick={playMIDI}
             disabled={!instrument}
-            style={{
-              padding: "12px 24px",
-              fontSize: "16px",
-              cursor: instrument ? "pointer" : "not-allowed",
-              background: instrument ? "#4caf50" : "#ccc",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              fontWeight: "bold",
-            }}
+            className={`btn btn-large ${instrument ? "btn-primary" : "btn-disabled"}`}
           >
             ▶️ Play MIDI
           </button>
         ) : (
-          <button
-            onClick={stopPlayback}
-            style={{
-              padding: "12px 24px",
-              fontSize: "16px",
-              cursor: "pointer",
-              background: "#e74c3c",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              fontWeight: "bold",
-            }}
-          >
-            ⏹ Stop
+          <button onClick={stopPlayback} className="btn btn-large btn-primary">
+            {" "}
+            ⏹ Stop{" "}
           </button>
         )}
-
         {!instrument && (
-          <span
-            style={{
-              marginLeft: "10px",
-              color: "#999",
-              fontSize: "14px",
-            }}
-          >
-            Loading piano soundfont...
+          <span className="midi-player-loading">
+            {" "}
+            Loading piano soundfont...{" "}
           </span>
         )}
-      </div>
-
+      </div>{" "}
       {isPlaying && (
         <div>
-          <div
-            style={{
-              width: "100%",
-              height: "6px",
-              background: "#ddd",
-              borderRadius: "3px",
-              overflow: "hidden",
-            }}
-          >
+          <div className="midi-player-progress-container">
             <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                background: "#4caf50",
-                transition: "width 0.1s linear",
-              }}
+              className="midi-player-progress-bar"
+              style={{ width: `${progress}%` }}
             />
           </div>
-          <p style={{ marginTop: "5px", fontSize: "12px", color: "#666" }}>
-            Playing... {progress}%
-          </p>
+          <p className="midi-player-progress-text">Playing... {progress}%</p>
         </div>
       )}
-
-      <p
-        style={{
-          marginTop: "15px",
-          fontSize: "12px",
-          color: "#999",
-        }}
-      >
-        Using acoustic grand piano soundfont • {pitchData.length} pitch samples
-      </p>
+      <p className="midi-player-info">
+        {" "}
+        Using acoustic grand piano soundfont • {pitchData.length}
+        pitch samples{" "}
+      </p>{" "}
     </div>
   );
 }

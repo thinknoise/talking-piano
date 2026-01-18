@@ -1,0 +1,68 @@
+@import '../../shared.css';
+
+.spectrogram-container {
+  padding: 20px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.spectrogram-container h2 {
+  color: #fff;
+  margin-top: 0;
+}
+
+.spectrogram-description {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.spectrogram-progress-wrapper {
+  margin-bottom: 15px;
+}
+
+.spectrogram-progress-container {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.spectrogram-progress-bar {
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.1s linear;
+}
+
+.spectrogram-progress-text {
+  color: #aaa;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.spectrogram-canvas {
+  border: 2px solid #333;
+  border-radius: 4px;
+  display: block;
+  background: #000;
+  max-width: 100%;
+}
+
+.spectrogram-legend {
+  margin-top: 15px;
+  padding: 10px;
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.spectrogram-legend p {
+  color: #aaa;
+  font-size: 12px;
+  margin: 0;
+}
+
+.spectrogram-legend p:not(:first-child) {
+  margin-top: 5px;
+}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
+import "./MicrophoneInput.css";
 
 // Autocorrelation pitch detection (same as PitchDetector)
 function autoCorrelate(buffer, sampleRate) {
@@ -13,11 +14,13 @@ function autoCorrelate(buffer, sampleRate) {
     const val = buffer[i];
     rms += val * val;
   }
+
   rms = Math.sqrt(rms / SIZE);
 
   if (rms < 0.01) return -1;
 
   let lastCorrelation = 1;
+
   for (let offset = 0; offset < MAX_SAMPLES; offset++) {
     let correlation = 0;
 
@@ -29,6 +32,7 @@ function autoCorrelate(buffer, sampleRate) {
 
     if (correlation > 0.9 && correlation > lastCorrelation) {
       const foundGoodCorrelation = correlation > best_correlation;
+
       if (foundGoodCorrelation) {
         best_correlation = correlation;
         best_offset = offset;
@@ -75,6 +79,7 @@ export default function MicrophoneInput({
       const instr = await Soundfont.instrument(ac, "acoustic_grand_piano");
       setInstrument(instr);
     };
+
     loadInstrument();
 
     return () => {
@@ -89,12 +94,15 @@ export default function MicrophoneInput({
       setError("");
 
       // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
       micStreamRef.current = stream;
 
       // Create audio context
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      const audioContext = new (
+        window.AudioContext || window.webkitAudioContext
+      )();
       audioContextRef.current = audioContext;
 
       // Create analyser
@@ -129,7 +137,12 @@ export default function MicrophoneInput({
       analyze();
     } catch (err) {
       console.error("Microphone error:", err);
-      setError(`Failed to access microphone: ${err.message}`);
+
+      setError(`Failed to access microphone: $ {
+          err.message
+        }
+
+        `);
     }
   };
 
@@ -158,8 +171,9 @@ export default function MicrophoneInput({
           // Convert to AudioBuffer
           try {
             const arrayBuffer = await audioBlob.arrayBuffer();
-            const audioContext = new (window.AudioContext ||
-              window.webkitAudioContext)();
+            const audioContext = new (
+              window.AudioContext || window.webkitAudioContext
+            )();
             const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
             // Send to parent for spectrogram analysis
@@ -214,7 +228,11 @@ export default function MicrophoneInput({
     if (hz > 50 && hz < 1000) {
       // eslint-disable-next-line react-hooks/purity
       const time = (performance.now() - startTimeRef.current) / 1000;
-      const pitch = { time: time.toFixed(3), hz: Math.round(hz * 100) / 100 };
+
+      const pitch = {
+        time: time.toFixed(3),
+        hz: Math.round(hz * 100) / 100,
+      };
 
       setCurrentPitch(pitch);
       pitchesRef.current.push(pitch);
@@ -222,22 +240,27 @@ export default function MicrophoneInput({
       // Live MIDI playback
       if (livePlayback && instrument) {
         const midiNote = Math.round(69 + 12 * Math.log2(hz / 440));
-        
+
         // If note changed, stop previous and play new
         if (currentNoteRef.current !== midiNote) {
           if (currentNoteRef.current !== null) {
             instrument.stop();
           }
-          instrument.play(midiNote, playbackAudioContextRef.current.currentTime, {
-            duration: 0.5,
-            gain: 0.3,
-          });
+
+          instrument.play(
+            midiNote,
+            playbackAudioContextRef.current.currentTime,
+            {
+              duration: 0.5,
+              gain: 0.3,
+            },
+          );
           currentNoteRef.current = midiNote;
         }
       }
     } else {
       setCurrentPitch(null);
-      
+
       // Stop playing when no pitch detected
       if (livePlayback && instrument && currentNoteRef.current !== null) {
         instrument.stop();
@@ -266,6 +289,7 @@ export default function MicrophoneInput({
     for (let i = 0; i < frequencyData.length; i++) {
       const barHeight = (frequencyData[i] / 255) * height;
       const hue = (i / frequencyData.length) * 240;
+
       ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
       ctx.fillRect(x, height - barHeight, barWidth, barHeight);
       x += barWidth + 1;
@@ -275,7 +299,13 @@ export default function MicrophoneInput({
     if (currentPitch) {
       ctx.fillStyle = "#fff";
       ctx.font = "bold 24px monospace";
-      ctx.fillText(`${currentPitch.hz} Hz`, 10, 30);
+
+      ctx.fillText(
+        `${currentPitch.hz}
+        Hz`,
+        10,
+        30,
+      );
     }
   };
 
@@ -284,9 +314,11 @@ export default function MicrophoneInput({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+
       if (micStreamRef.current) {
         micStreamRef.current.getTracks().forEach((track) => track.stop());
       }
+
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
@@ -294,112 +326,77 @@ export default function MicrophoneInput({
   }, []);
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        background: "#f0f0f0",
-        borderRadius: "8px",
-        marginBottom: "20px",
-      }}
-    >
+    <div className="microphone-container">
       <canvas
         ref={canvasRef}
         width={800}
         height={200}
-        style={{
-          border: "2px solid #333",
-          borderRadius: "4px",
-          display: "block",
-          margin: "0px auto 10px auto",
-          background: "#000",
-        }}
+        className="microphone-canvas"
       />
+      <div className="controls-row">
+        {/* Section 1: Checkbox */}
+        <div className="controls-section">
+          <label className="live-playback-label">
+            <input
+              type="checkbox"
+              checked={livePlayback}
+              onChange={(e) => setLivePlayback(e.target.checked)}
+              disabled={!instrument || isRecording}
+              className="live-playback-checkbox"
+            />
+            <span
+              className={`emoji-live-label ${livePlayback ? "active" : ""} ${instrument ? "enabled" : "disabled"}`}
+            >
+              <span className="emoji-mic">🎤</span>
+              <span className="emoji-connector"></span>
+              <span className="emoji-speaker">🔊</span>
+            </span>
+            {!instrument && (
+              <span className="loading-text">(loading piano...)</span>
+            )}
+          </label>
+        </div>
 
-      <div style={{ marginBottom: "15px" }}>
-        <label style={{ display: "flex", alignItems: "center", marginBottom: "10px", cursor: "pointer" }}>
-          <input
-            type="checkbox"
-            checked={livePlayback}
-            onChange={(e) => setLivePlayback(e.target.checked)}
-            disabled={!instrument || isRecording}
-            style={{ marginRight: "8px" }}
-          />
-          <span style={{ fontSize: "14px", color: instrument ? "#333" : "#999" }}>
-            🎹 Enable Live MIDI Playback {!instrument && "(loading piano...)"}
-          </span>
-        </label>
+        {/* Section 2: Start button */}
+        <div className="controls-section">
+          {!isRecording ? (
+            <button onClick={startRecording} className="btn btn-danger">
+              Start Recording
+            </button>
+          ) : (
+            <button onClick={stopRecording} className="btn btn-primary">
+              ⏹ Stop Recording
+            </button>
+          )}
+        </div>
+
+        {/* Section 3: Stats */}
+        <div className="stats-section">
+          {isRecording && (
+            <span className="recording-status">
+              ● RECORDING - {pitchesRef.current.length} pitches detected
+            </span>
+          )}
+
+          {recordedPitches.length > 0 && !isRecording && (
+            <div className="recording-results">
+              <p className="result-title">
+                ✓ Recorded {recordedPitches.length} pitch samples
+              </p>
+              <p className="result-details">
+                Duration: {recordedPitches[recordedPitches.length - 1]?.time}s |
+                Range: {Math.min(...recordedPitches.map((p) => p.hz))}Hz -{" "}
+                {Math.max(...recordedPitches.map((p) => p.hz))}Hz
+              </p>
+              <p className="result-note">
+                You can now generate MIDI from this recording!
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div style={{ marginBottom: "15px" }}>
-        {!isRecording ? (
-          <button
-            onClick={startRecording}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              cursor: "pointer",
-              background: "#e74c3c",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
-          >
-            🔴 Start Recording
-          </button>
-        ) : (
-          <button
-            onClick={stopRecording}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              cursor: "pointer",
-              background: "#555",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
-          >
-            ⏹ Stop Recording
-          </button>
-        )}
-
-        {isRecording && (
-          <span style={{ color: "#e74c3c", fontWeight: "bold" }}>
-            ● RECORDING - {pitchesRef.current.length} pitches detected
-          </span>
-        )}
-      </div>
-
-      {error && (
-        <div style={{ color: "red", marginTop: "10px", fontSize: "14px" }}>
-          {error}
-        </div>
-      )}
-
-      {recordedPitches.length > 0 && !isRecording && (
-        <div
-          style={{
-            marginTop: "15px",
-            padding: "10px",
-            background: "#e8f4f8",
-            borderRadius: "4px",
-          }}
-        >
-          <p style={{ fontWeight: "bold", color: "#2c3e50" }}>
-            ✓ Recorded {recordedPitches.length} pitch samples
-          </p>
-          <p style={{ fontSize: "14px", color: "#666", marginTop: "5px" }}>
-            Duration: {recordedPitches[recordedPitches.length - 1]?.time}s |
-            Range: {Math.min(...recordedPitches.map((p) => p.hz))}Hz -{" "}
-            {Math.max(...recordedPitches.map((p) => p.hz))}Hz
-          </p>
-          <p style={{ fontSize: "12px", color: "#999", marginTop: "5px" }}>
-            You can now generate MIDI from this recording!
-          </p>
-        </div>
-      )}
+      {error && <div className="message message-error mt-10">{error}</div>}
     </div>
   );
 }

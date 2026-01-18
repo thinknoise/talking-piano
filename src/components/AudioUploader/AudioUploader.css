@@ -1,0 +1,6 @@
+@import '../../shared.css';
+
+.audio-uploader-success {
+  color: #27ae60;
+  margin-left: 10px;
+}

@@ -1,0 +1,46 @@
+@import '../../shared.css';
+
+.pitch-detector-container {
+  padding: 20px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.pitch-detector-container h2 {
+  margin-top: 0;
+}
+
+.pitch-detector-container .btn {
+  margin-right: 10px;
+}
+
+.pitch-results {
+  margin-top: 20px;
+}
+
+.pitch-results h3 {
+  margin-top: 0;
+}
+
+.pitch-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.pitch-range-info {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.pitch-algorithm-note {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
