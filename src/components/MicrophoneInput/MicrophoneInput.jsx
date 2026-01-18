@@ -17,7 +17,7 @@ function autoCorrelate(buffer, sampleRate) {
 
   rms = Math.sqrt(rms / SIZE);
 
-  if (rms < 0.01) return -1;
+  if (rms < 0.0005) return -1;
 
   let lastCorrelation = 1;
 
@@ -58,6 +58,89 @@ export default function MicrophoneInput({
   const [error, setError] = useState("");
   const [livePlayback, setLivePlayback] = useState(false);
   const [instrument, setInstrument] = useState(null);
+  const [selectedInstrument, setSelectedInstrument] = useState("acoustic_grand_piano");
+
+  const availableInstruments = [
+    { value: "acoustic_grand_piano", label: "Acoustic Grand Piano" },
+    { value: "bright_acoustic_piano", label: "Bright Acoustic Piano" },
+    { value: "electric_grand_piano", label: "Electric Grand Piano" },
+    { value: "honkytonk_piano", label: "Honky-tonk Piano" },
+    { value: "electric_piano_1", label: "Electric Piano 1" },
+    { value: "electric_piano_2", label: "Electric Piano 2" },
+    { value: "harpsichord", label: "Harpsichord" },
+    { value: "clavinet", label: "Clavinet" },
+    { value: "celesta", label: "Celesta" },
+    { value: "glockenspiel", label: "Glockenspiel" },
+    { value: "music_box", label: "Music Box" },
+    { value: "vibraphone", label: "Vibraphone" },
+    { value: "marimba", label: "Marimba" },
+    { value: "xylophone", label: "Xylophone" },
+    { value: "tubular_bells", label: "Tubular Bells" },
+    { value: "dulcimer", label: "Dulcimer" },
+    { value: "drawbar_organ", label: "Drawbar Organ" },
+    { value: "percussive_organ", label: "Percussive Organ" },
+    { value: "rock_organ", label: "Rock Organ" },
+    { value: "church_organ", label: "Church Organ" },
+    { value: "reed_organ", label: "Reed Organ" },
+    { value: "accordion", label: "Accordion" },
+    { value: "harmonica", label: "Harmonica" },
+    { value: "tango_accordion", label: "Tango Accordion" },
+    { value: "acoustic_guitar_nylon", label: "Acoustic Guitar (nylon)" },
+    { value: "acoustic_guitar_steel", label: "Acoustic Guitar (steel)" },
+    { value: "electric_guitar_jazz", label: "Electric Guitar (jazz)" },
+    { value: "electric_guitar_clean", label: "Electric Guitar (clean)" },
+    { value: "electric_guitar_muted", label: "Electric Guitar (muted)" },
+    { value: "overdriven_guitar", label: "Overdriven Guitar" },
+    { value: "distortion_guitar", label: "Distortion Guitar" },
+    { value: "acoustic_bass", label: "Acoustic Bass" },
+    { value: "electric_bass_finger", label: "Electric Bass (finger)" },
+    { value: "electric_bass_pick", label: "Electric Bass (pick)" },
+    { value: "fretless_bass", label: "Fretless Bass" },
+    { value: "slap_bass_1", label: "Slap Bass 1" },
+    { value: "slap_bass_2", label: "Slap Bass 2" },
+    { value: "synth_bass_1", label: "Synth Bass 1" },
+    { value: "synth_bass_2", label: "Synth Bass 2" },
+    { value: "violin", label: "Violin" },
+    { value: "viola", label: "Viola" },
+    { value: "cello", label: "Cello" },
+    { value: "contrabass", label: "Contrabass" },
+    { value: "tremolo_strings", label: "Tremolo Strings" },
+    { value: "pizzicato_strings", label: "Pizzicato Strings" },
+    { value: "orchestral_harp", label: "Orchestral Harp" },
+    { value: "timpani", label: "Timpani" },
+    { value: "string_ensemble_1", label: "String Ensemble 1" },
+    { value: "string_ensemble_2", label: "String Ensemble 2" },
+    { value: "synthstrings_1", label: "SynthStrings 1" },
+    { value: "synthstrings_2", label: "SynthStrings 2" },
+    { value: "choir_aahs", label: "Choir Aahs" },
+    { value: "voice_oohs", label: "Voice Oohs" },
+    { value: "synth_voice", label: "Synth Voice" },
+    { value: "orchestra_hit", label: "Orchestra Hit" },
+    { value: "trumpet", label: "Trumpet" },
+    { value: "trombone", label: "Trombone" },
+    { value: "tuba", label: "Tuba" },
+    { value: "muted_trumpet", label: "Muted Trumpet" },
+    { value: "french_horn", label: "French Horn" },
+    { value: "brass_section", label: "Brass Section" },
+    { value: "synthbrass_1", label: "SynthBrass 1" },
+    { value: "synthbrass_2", label: "SynthBrass 2" },
+    { value: "soprano_sax", label: "Soprano Sax" },
+    { value: "alto_sax", label: "Alto Sax" },
+    { value: "tenor_sax", label: "Tenor Sax" },
+    { value: "baritone_sax", label: "Baritone Sax" },
+    { value: "oboe", label: "Oboe" },
+    { value: "english_horn", label: "English Horn" },
+    { value: "bassoon", label: "Bassoon" },
+    { value: "clarinet", label: "Clarinet" },
+    { value: "piccolo", label: "Piccolo" },
+    { value: "flute", label: "Flute" },
+    { value: "recorder", label: "Recorder" },
+    { value: "pan_flute", label: "Pan Flute" },
+    { value: "blown_bottle", label: "Blown Bottle" },
+    { value: "shakuhachi", label: "Shakuhachi" },
+    { value: "whistle", label: "Whistle" },
+    { value: "ocarina", label: "Ocarina" },
+  ];
 
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -71,12 +154,15 @@ export default function MicrophoneInput({
   const currentNoteRef = useRef(null);
   const playbackAudioContextRef = useRef(null);
 
-  // Load soundfont instrument on mount
+  // Load soundfont instrument on mount and when instrument changes
   useEffect(() => {
     const loadInstrument = async () => {
+      if (playbackAudioContextRef.current) {
+        playbackAudioContextRef.current.close();
+      }
       const ac = new (window.AudioContext || window.webkitAudioContext)();
       playbackAudioContextRef.current = ac;
-      const instr = await Soundfont.instrument(ac, "acoustic_grand_piano");
+      const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
 
@@ -87,7 +173,7 @@ export default function MicrophoneInput({
         playbackAudioContextRef.current.close();
       }
     };
-  }, []);
+  }, [selectedInstrument]);
 
   const startRecording = async () => {
     try {
@@ -251,7 +337,6 @@ export default function MicrophoneInput({
             midiNote,
             playbackAudioContextRef.current.currentTime,
             {
-              duration: 0.5,
               gain: 0.3,
             },
           );
@@ -300,12 +385,7 @@ export default function MicrophoneInput({
       ctx.fillStyle = "#fff";
       ctx.font = "bold 24px monospace";
 
-      ctx.fillText(
-        `${currentPitch.hz}
-        Hz`,
-        10,
-        30,
-      );
+      ctx.fillText(`${currentPitch.hz} Hz`, 10, 30);
     }
   };
 
@@ -334,30 +414,37 @@ export default function MicrophoneInput({
         className="microphone-canvas"
       />
       <div className="controls-row">
-        {/* Section 1: Checkbox */}
+        {/* Section 1: Live Playback Toggle */}
         <div className="controls-section">
-          <label className="live-playback-label">
-            <input
-              type="checkbox"
-              checked={livePlayback}
-              onChange={(e) => setLivePlayback(e.target.checked)}
-              disabled={!instrument || isRecording}
-              className="live-playback-checkbox"
-            />
-            <span
-              className={`emoji-live-label ${livePlayback ? "active" : ""} ${instrument ? "enabled" : "disabled"}`}
-            >
-              <span className="emoji-mic">🎤</span>
-              <span className="emoji-connector"></span>
-              <span className="emoji-speaker">🔊</span>
-            </span>
-            {!instrument && (
-              <span className="loading-text">(loading piano...)</span>
-            )}
-          </label>
+          <button
+            onClick={() => setLivePlayback(!livePlayback)}
+            disabled={!instrument || isRecording}
+            className={`live-playback-button ${livePlayback ? "active" : ""} ${instrument ? "enabled" : "disabled"}`}
+          >
+            <span className="emoji-mic">🎤</span>
+            <span className="live-text">LIVE</span>
+            <span className="emoji-speaker">🔊</span>
+          </button>
+          {!instrument && (
+            <span className="loading-text">(loading piano...)</span>
+          )}
         </div>
-
-        {/* Section 2: Start button */}
+        {/* Section 2: Instrument Selector */}
+        <div className="controls-section">
+          <select
+            value={selectedInstrument}
+            onChange={(e) => setSelectedInstrument(e.target.value)}
+            disabled={isRecording}
+            className="instrument-selector"
+          >
+            {availableInstruments.map((instr) => (
+              <option key={instr.value} value={instr.value}>
+                {instr.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Section 3: Start button */}
         <div className="controls-section">
           {!isRecording ? (
             <button onClick={startRecording} className="btn btn-danger">
@@ -369,34 +456,34 @@ export default function MicrophoneInput({
             </button>
           )}
         </div>
-
-        {/* Section 3: Stats */}
+        {/* Section 4: Stats */}
         <div className="stats-section">
           {isRecording && (
             <span className="recording-status">
-              ● RECORDING - {pitchesRef.current.length} pitches detected
+              ● RECORDING - {pitchesRef.current.length}
+              pitches detected
             </span>
           )}
-
           {recordedPitches.length > 0 && !isRecording && (
             <div className="recording-results">
               <p className="result-title">
-                ✓ Recorded {recordedPitches.length} pitch samples
+                ✓ Recorded {recordedPitches.length}
+                pitch samples
               </p>
               <p className="result-details">
                 Duration: {recordedPitches[recordedPitches.length - 1]?.time}s |
-                Range: {Math.min(...recordedPitches.map((p) => p.hz))}Hz -{" "}
-                {Math.max(...recordedPitches.map((p) => p.hz))}Hz
+                Range: {Math.min(...recordedPitches.map((p) => p.hz))}
+                Hz - {Math.max(...recordedPitches.map((p) => p.hz))}
+                Hz
               </p>
               <p className="result-note">
-                You can now generate MIDI from this recording!
+                You can now generate MIDI from this recording !
               </p>
             </div>
           )}
         </div>
       </div>
-
-      {error && <div className="message message-error mt-10">{error}</div>}
+      {error && <div className="message message-error mt-10"> {error}</div>}
     </div>
   );
 }
