@@ -180,3 +180,49 @@
     padding: 10px;
   }
 }
+
+/* Custom Tooltips */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px) rotateX(-90deg);
+  transform-origin: bottom center;
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s ease;
+
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px) rotateX(-90deg);
+  background-color: #b3b3b3;
+  color: #000000;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) rotateX(0deg);
+}
+
+/* Optional: arrow */
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #b3b3b3 transparent transparent transparent;
+}

@@ -342,39 +342,45 @@ export default function MicrophoneInput({
       <div className="controls-row">
         {/* Section 1: Live Playback Toggle */}
         <div className="controls-section">
-          <button
-            onClick={() => setLivePlayback(!livePlayback)}
-            disabled={!instrument || isRecording}
-            className={`live-playback-button ${livePlayback ? "active" : ""} ${instrument ? "enabled" : "disabled"}`}
-          >
-            <span className="emoji-mic">🎤</span>
-            <span className="live-text">LIVE</span>
-            <span className="emoji-speaker">🔊</span>
-          </button>
+          <div className="tooltip-wrapper">
+            <button
+              onClick={() => setLivePlayback(!livePlayback)}
+              disabled={!instrument || isRecording}
+              className={`live-playback-button ${livePlayback ? "active" : ""} ${instrument ? "enabled" : "disabled"}`}
+            >
+              <span className="emoji-mic">🎤</span>
+              <span className="live-text">LIVE</span>
+              <span className="emoji-speaker">🔊</span>
+            </button>
+            <span className="tooltip-text">live MIDI</span>
+          </div>
           {!instrument && (
             <span className="loading-text">(loading piano...)</span>
           )}
         </div>
         {/* Section 2: Instrument Selector */}
         <div className="controls-section">
-          <select
-            value={selectedInstrument}
-            onChange={(e) => setSelectedInstrument(e.target.value)}
-            disabled={isRecording}
-            className="instrument-selector"
-          >
-            {availableInstruments.map((instr) => (
-              <option key={instr.value} value={instr.value}>
-                {instr.label}
-              </option>
-            ))}
-          </select>
+          <div className="tooltip-wrapper">
+            <select
+              value={selectedInstrument}
+              onChange={(e) => setSelectedInstrument(e.target.value)}
+              disabled={isRecording}
+              className="instrument-selector"
+            >
+              {availableInstruments.map((instr) => (
+                <option key={instr.value} value={instr.value}>
+                  {instr.label}
+                </option>
+              ))}
+            </select>
+            <span className="tooltip-text">select instrument</span>
+          </div>
         </div>
         {/* Section 3: Start button */}
         <div className="controls-section">
           {!isRecording ? (
             <button onClick={startRecording} className="btn btn-danger">
-              {livePlayback ? "Fuck it! Do it LIVE!" : "Start Recording"}
+              Start Recording
             </button>
           ) : (
             <button onClick={stopRecording} className="btn btn-primary">
