@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
 import { availableInstruments } from "../../constants/instruments";
 import { autoCorrelate, hzToMidi } from "../../utils/pitchDetection";
+import { getAudioContext, resumeAudioContext } from "../../utils/audioContext";
 import "./MicrophoneInput.css";
 
 export default function MicrophoneInput({
@@ -17,7 +18,7 @@ export default function MicrophoneInput({
   const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
 
   const canvasRef = useRef(null);
-  const audioContextRef = useRef(null);
+  const audioContextRef = useRef(null); // For microphone recording only
   const analyserRef = useRef(null);
   const micStreamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -26,7 +27,6 @@ export default function MicrophoneInput({
   const startTimeRef = useRef(0);
   const pitchesRef = useRef([]);
   const currentNoteRef = useRef(null);
-  const playbackAudioContextRef = useRef(null);
   const statsIntervalRef = useRef(null);
 
   const [liveStats, setLiveStats] = useState({
@@ -39,32 +39,12 @@ export default function MicrophoneInput({
   // Load soundfont instrument on mount and when instrument changes
   useEffect(() => {
     const loadInstrument = async () => {
-      // Don't close the context when changing instruments, just create new instrument with existing context
-      if (
-        !playbackAudioContextRef.current ||
-        playbackAudioContextRef.current.state === "closed"
-      ) {
-        playbackAudioContextRef.current = new (
-          window.AudioContext || window.webkitAudioContext
-        )();
-      }
-
-      const ac = playbackAudioContextRef.current;
-
-      // Resume AudioContext if it's suspended (required by browsers for autoplay policy)
-      if (ac.state === "suspended") {
-        await ac.resume();
-      }
-
+      const ac = await resumeAudioContext();
       const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
 
     loadInstrument();
-
-    return () => {
-      // Don't close context on cleanup - let it persist
-    };
   }, [selectedInstrument]);
 
   const startRecording = async () => {
@@ -178,18 +158,18 @@ export default function MicrophoneInput({
 
           // Only process if we have audio data
           if (audioBlob.size > 0) {
-            // Convert to AudioBuffer - create a new context for playback
+            // Convert to AudioBuffer
             try {
               const arrayBuffer = await audioBlob.arrayBuffer();
-              const playbackContext = new (
+              const decodeContext = new (
                 window.AudioContext || window.webkitAudioContext
               )();
               const audioBuffer =
-                await playbackContext.decodeAudioData(arrayBuffer);
+                await decodeContext.decodeAudioData(arrayBuffer);
 
-              // Send to parent for spectrogram analysis with the new playback context
+              // Send to parent
               if (onAudioRecorded) {
-                onAudioRecorded(audioBuffer, playbackContext);
+                onAudioRecorded(audioBuffer);
               }
             } catch (err) {
               console.error("Failed to decode recorded audio:", err);
@@ -259,9 +239,10 @@ export default function MicrophoneInput({
             instrument.stop();
           }
 
+          const audioContext = getAudioContext();
           instrument.play(
             midiNote,
-            playbackAudioContextRef.current.currentTime,
+            audioContext.currentTime,
             {
               gain: 1.0,
             },

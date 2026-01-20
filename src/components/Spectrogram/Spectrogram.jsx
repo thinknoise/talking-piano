@@ -1,17 +1,17 @@
 import { useRef, useEffect, useState } from "react";
 import "./Spectrogram.css";
 
-export default function Spectrogram({ audioBuffer, audioContext }) {
+export default function Spectrogram({ audioBuffer }) {
   const canvasRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [spectrogramData, setSpectrogramData] = useState(null);
 
   useEffect(() => {
-    if (audioBuffer && audioContext && canvasRef.current) {
+    if (audioBuffer && canvasRef.current) {
       generateSpectrogram();
     }
-  }, [audioBuffer, audioContext]);
+  }, [audioBuffer]);
 
   const generateSpectrogram = async () => {
     setIsGenerating(true);

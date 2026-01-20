@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import Soundfont from "soundfont-player";
 import { availableInstruments } from "../../constants/instruments";
 import { hzToMidi } from "../../utils/pitchDetection";
+import { getAudioContext, resumeAudioContext } from "../../utils/audioContext";
 import "./MIDIPlayer.css";
 
 export default function MIDIPlayer({ pitchData, downloadButton }) {
@@ -9,45 +10,12 @@ export default function MIDIPlayer({ pitchData, downloadButton }) {
   const [instrument, setInstrument] = useState(null);
   const [progress, setProgress] = useState(0);
   const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
-  const audioContextRef = useRef(null);
   const playbackRef = useRef(null);
-
-  useEffect(() => {
-    // Initialize AudioContext once
-    if (
-      !audioContextRef.current ||
-      audioContextRef.current.state === "closed"
-    ) {
-      audioContextRef.current = new (
-        window.AudioContext || window.webkitAudioContext
-      )();
-    }
-
-    return () => {
-      // Don't close on every unmount in development (Strict Mode double-mounting)
-      // Only close when truly unmounting
-    };
-  }, []);
 
   useEffect(() => {
     // Load instrument when selection changes
     const loadInstrument = async () => {
-      if (
-        !audioContextRef.current ||
-        audioContextRef.current.state === "closed"
-      ) {
-        audioContextRef.current = new (
-          window.AudioContext || window.webkitAudioContext
-        )();
-      }
-
-      const ac = audioContextRef.current;
-
-      // Resume AudioContext if it's suspended
-      if (ac.state === "suspended") {
-        await ac.resume();
-      }
-
+      const ac = await resumeAudioContext();
       const instr = await Soundfont.instrument(ac, selectedInstrument);
       setInstrument(instr);
     };
@@ -105,7 +73,8 @@ export default function MIDIPlayer({ pitchData, downloadButton }) {
     }
 
     // Play notes
-    const startTime = audioContextRef.current.currentTime;
+    const audioContext = getAudioContext();
+    const startTime = audioContext.currentTime;
     const totalDuration = noteGroups[noteGroups.length - 1]?.time || 0;
 
     playbackRef.current = {
