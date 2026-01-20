@@ -16,13 +16,13 @@ export default function AudioUploader({ onAudioLoaded }) {
       // Read file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer();
 
-      // Decode audio data
+      // Decode audio data (context only used for decoding)
       const audioContext = new (
         window.AudioContext || window.webkitAudioContext
       )();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-      onAudioLoaded(audioBuffer, audioContext);
+      onAudioLoaded(audioBuffer);
     } catch (err) {
       console.error("Audio decoding error:", err);
       setError(

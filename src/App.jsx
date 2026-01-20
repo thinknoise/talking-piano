@@ -22,16 +22,14 @@ function isHarmonic(freq, fundamental, tolerance = 0.1) {
 
 function App() {
   const [activeAudioBuffer, setActiveAudioBuffer] = useState(null);
-  const [activeAudioContext, setActiveAudioContext] = useState(null);
   const [pitchData, setPitchData] = useState([]);
   const [audioSource, setAudioSource] = useState(null); // "microphone" or "file"
   const [activeTab, setActiveTab] = useState("microphone"); // Current active tab
   const [isDetecting, setIsDetecting] = useState(false);
   const isAutoDetectingRef = useRef(false);
 
-  const handleAudioLoaded = (buffer, context) => {
+  const handleAudioLoaded = (buffer) => {
     setActiveAudioBuffer(buffer);
-    setActiveAudioContext(context);
     setAudioSource("file");
     setPitchData([]); // Reset pitch data when new audio is loaded
     setActiveTab("waveform"); // Navigate to waveform tab
@@ -220,9 +218,8 @@ function App() {
     setPitchData(pitches);
   };
 
-  const handleRecordedAudio = (buffer, context) => {
+  const handleRecordedAudio = (buffer) => {
     setActiveAudioBuffer(buffer);
-    setActiveAudioContext(context);
     setAudioSource("microphone");
     setPitchData([]); // Reset pitch data when new recording is made
   };
@@ -346,10 +343,7 @@ function App() {
                 {audioSource &&
                   ` (${audioSource === "microphone" ? "Microphone Recording" : "Uploaded File"})`}
               </h2>
-              <Spectrogram
-                audioBuffer={activeAudioBuffer}
-                audioContext={activeAudioContext}
-              />
+              <Spectrogram audioBuffer={activeAudioBuffer} />
               <SpectralPitchDetector
                 audioBuffer={activeAudioBuffer}
                 onPitchDetected={handlePitchDetected}
