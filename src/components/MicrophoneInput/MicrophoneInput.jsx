@@ -16,6 +16,7 @@ export default function MicrophoneInput({
   const [livePlayback, setLivePlayback] = useState(false);
   const [instrument, setInstrument] = useState(null);
   const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
+  const [noteDuration, setNoteDuration] = useState(1.0); // Duration in seconds for live MIDI notes
 
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null); // For microphone recording only
@@ -245,6 +246,7 @@ export default function MicrophoneInput({
             audioContext.currentTime,
             {
               gain: 1.0,
+              duration: noteDuration,
             },
           );
           currentNoteRef.current = midiNote;
@@ -404,6 +406,25 @@ export default function MicrophoneInput({
               <p className="result-details">Press Start Recording to begin</p>
             </div>
           )}
+        </div>
+      </div>
+      <div className="live-midi-controls">
+        <h4>Live MIDI Controls</h4>
+        <div className="slider-control">
+          <label htmlFor="duration-slider">
+            Note Duration: {noteDuration.toFixed(1)}s
+          </label>
+          <input
+            id="duration-slider"
+            type="range"
+            min="0.1"
+            max="3.0"
+            step="0.1"
+            value={noteDuration}
+            onChange={(e) => setNoteDuration(parseFloat(e.target.value))}
+            disabled={!livePlayback}
+            className="slider"
+          />
         </div>
       </div>
       {error && <div className="message message-error mt-10"> {error}</div>}
