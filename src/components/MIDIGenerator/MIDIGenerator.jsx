@@ -80,8 +80,6 @@ export default function MIDIGenerator({ pitchData }) {
 
         // Add rest if needed
         if (targetTimeTicks > currentTimeTicks) {
-          const waitTicks = targetTimeTicks - currentTimeTicks;
-
           track.addEvent(
             new MidiWriter.NoteEvent({
               pitch: ["C4"],
@@ -161,7 +159,8 @@ export default function MIDIGenerator({ pitchData }) {
       className="midi-download-button"
       title={isGenerating ? "Generating..." : "Download MIDI file"}
     >
-      💾
+      {" "}
+      💾{" "}
     </button>
   );
 }

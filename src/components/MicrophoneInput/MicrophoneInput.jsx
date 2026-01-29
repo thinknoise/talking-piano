@@ -17,6 +17,8 @@ export default function MicrophoneInput({
   const [instrument, setInstrument] = useState(null);
   const [selectedInstrument, setSelectedInstrument] = useState("voice_oohs");
   const [noteDuration, setNoteDuration] = useState(1.0); // Duration in seconds for live MIDI notes
+  const [sensitivity, setSensitivity] = useState(0.01); // Amplitude threshold (0.001 to 0.1)
+  const [currentRMS, setCurrentRMS] = useState(0); // Current audio amplitude for debugging
 
   const canvasRef = useRef(null);
   const audioContextRef = useRef(null); // For microphone recording only
@@ -215,6 +217,26 @@ export default function MicrophoneInput({
     const timeDomainData = new Float32Array(bufferLength);
     analyser.getFloatTimeDomainData(timeDomainData);
 
+    // Calculate RMS (Root Mean Square) for volume/amplitude
+    let sum = 0;
+    for (let i = 0; i < timeDomainData.length; i++) {
+      sum += timeDomainData[i] * timeDomainData[i];
+    }
+    const rms = Math.sqrt(sum / timeDomainData.length);
+
+    // Update current RMS for display
+    setCurrentRMS(rms);
+
+    // Only detect pitch if amplitude is above threshold
+    if (rms < sensitivity) {
+      setCurrentPitch(null);
+      if (livePlayback && instrument && currentNoteRef.current !== null) {
+        instrument.stop();
+        currentNoteRef.current = null;
+      }
+      return;
+    }
+
     // Detect pitch
     const hz = autoCorrelate(timeDomainData, audioContext.sampleRate);
 
@@ -241,14 +263,10 @@ export default function MicrophoneInput({
           }
 
           const audioContext = getAudioContext();
-          instrument.play(
-            midiNote,
-            audioContext.currentTime,
-            {
-              gain: 1.0,
-              duration: noteDuration,
-            },
-          );
+          instrument.play(midiNote, audioContext.currentTime, {
+            gain: 1.0,
+            duration: noteDuration,
+          });
           currentNoteRef.current = midiNote;
         }
       }
@@ -410,6 +428,39 @@ export default function MicrophoneInput({
       </div>
       <div className="live-midi-controls">
         <h4>Live MIDI Controls</h4>
+        <div className="slider-control">
+          <label htmlFor="sensitivity-slider">
+            Sensitivity: {(sensitivity * 100).toFixed(2)}% (RMS:{" "}
+            {(currentRMS * 100).toFixed(2)}%)
+          </label>
+          <div className="vu-meter">
+            <div
+              className="vu-meter-bar"
+              style={{
+                width: `${Math.min((currentRMS / 0.3) * 100, 100)}%`,
+                backgroundColor:
+                  currentRMS < 0.05
+                    ? "#4caf50"
+                    : currentRMS < 0.15
+                      ? "#ffeb3b"
+                      : "#f44336",
+              }}
+            />
+          </div>
+          <input
+            id="sensitivity-slider"
+            type="range"
+            min="0.001"
+            max="0.1"
+            step="0.001"
+            value={sensitivity}
+            onChange={(e) => setSensitivity(parseFloat(e.target.value))}
+            className="slider"
+          />
+          <span className="slider-hint">
+            Lower = more sensitive to quiet sounds
+          </span>
+        </div>
         <div className="slider-control">
           <label htmlFor="duration-slider">
             Note Duration: {noteDuration.toFixed(1)}s
